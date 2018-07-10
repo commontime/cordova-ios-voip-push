@@ -43,15 +43,22 @@
 {
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
-
-    NSString *message = payloadDict[@"alert"];
-    NSLog(@"[objC] received VoIP msg: %@", message);
-
-    NSMutableDictionary* results = [NSMutableDictionary dictionaryWithCapacity:2];
-    [results setObject:message forKey:@"function"];
-    [results setObject:@"someOtherDataForField" forKey:@"someOtherField"];
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
+    NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
+    
+    for(NSString *apsKey in payloadDict)
+    {
+        id apsObject = [payloadDict objectForKey:apsKey];
+        
+        if([apsKey compare:@"alert"] == NSOrderedSame)
+            [newPushData setObject:apsObject forKey:@"message"];
+        else
+            [newPushData setObject:apsObject forKey:apsKey];
+    }
+    
+    [newPushData setObject:@"APNS" forKey:@"service"];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.VoIPPushCallbackId];
 }
