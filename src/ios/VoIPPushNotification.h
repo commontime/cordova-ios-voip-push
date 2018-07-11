@@ -3,7 +3,6 @@
 
 @interface VoIPPushNotification : CDVPlugin <PKPushRegistryDelegate>
 
-@property (nonatomic, copy) NSString *VoIPPushCallbackId;
 - (void)init:(CDVInvokedUrlCommand*)command;
 
 @end
