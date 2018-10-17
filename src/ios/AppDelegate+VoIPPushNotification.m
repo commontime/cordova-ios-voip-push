@@ -1,5 +1,4 @@
 #import "AppDelegate+VoIPPushNotification.h"
-#import <PushKit/PushKit.h>
 
 @implementation AppDelegate (VoIPPushNotification)
 
