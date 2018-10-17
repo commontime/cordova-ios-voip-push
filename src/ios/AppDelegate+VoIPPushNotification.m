@@ -11,7 +11,7 @@
     PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     pushRegistry.delegate = self;
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
-    [super application:application didFinishLaunchingWithOptions:launchOptions];
+    return [super application:application didFinishLaunchingWithOptions:launchOptions];
 };
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type {
