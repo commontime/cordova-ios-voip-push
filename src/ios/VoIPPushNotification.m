@@ -1,5 +1,6 @@
 #import "VoIPPushNotification.h"
 #import <Cordova/CDV.h>
+#import "AppDelegate+VoIPPushNotification.h"
 
 @implementation VoIPPushNotification
 {
@@ -25,7 +26,7 @@
 
     AppDelegate * appDelegate = [UIApplication sharedApplication].delegate;
     [appDelegate endBackgroundTask];
-    
+
     if([credentials.token length] == 0) {
         NSLog(@"[objC] No device token!");
         return;
