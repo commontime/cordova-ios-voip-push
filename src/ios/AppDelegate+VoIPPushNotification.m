@@ -8,9 +8,6 @@
         [app endBackgroundTask:bgTask];
         bgTask = UIBackgroundTaskInvalid;
     }];
-    PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
-    pushRegistry.delegate = self;
-    pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     return [super application:application didFinishLaunchingWithOptions:launchOptions];
 };
 
