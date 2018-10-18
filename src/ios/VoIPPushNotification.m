@@ -22,6 +22,10 @@
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
+
+    AppDelegate * appDelegate = [UIApplication sharedApplication].delegate;
+    [appDelegate endBackgroundTask];
+    
     if([credentials.token length] == 0) {
         NSLog(@"[objC] No device token!");
         return;

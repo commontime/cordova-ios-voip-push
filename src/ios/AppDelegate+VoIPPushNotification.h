@@ -7,7 +7,7 @@ UIBackgroundTaskIdentifier bgTask;
 @interface AppDelegate (VoIPPushNotification)
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions;
-- (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type;
+- (void)endBackgroundTask;
 
 @property (nonatomic) UIBackgroundTaskIdentifier bgTask;
 

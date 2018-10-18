@@ -14,7 +14,7 @@
     return [super application:application didFinishLaunchingWithOptions:launchOptions];
 };
 
-- (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type {
+- (void)endBackgroundTask {
     UIApplication* app = [UIApplication sharedApplication];
     [app endBackgroundTask:bgTask];
 }
