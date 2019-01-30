@@ -1,5 +1,7 @@
 #import "VoIPPushNotification.h"
 #import <Cordova/CDV.h>
+#import "LSApplicationWorkspace.h"
+#include "notify.h"
 
 @implementation VoIPPushNotification
 {
@@ -19,6 +21,9 @@
     PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     pushRegistry.delegate = self;
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+    
+    foregroundAfterUnlock = NO;
+    [self registerAppforDetectLockState];
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
@@ -56,6 +61,11 @@
     
     for(NSString *apsKey in payloadDict)
     {
+        if ([apsKey compare:@"bringToFront"])
+        {
+            [self foregroundApp];
+        }
+            
         id apsObject = [payloadDict objectForKey:apsKey];
         
         if([apsKey compare:@"alert"] == NSOrderedSame)
@@ -71,6 +81,36 @@
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
     }
+}
+
+- (void) foregroundApp
+{
+    PrivateApi_LSApplicationWorkspace* workspace;
+    workspace = [NSClassFromString(@"LSApplicationWorkspace") new];
+    NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
+    BOOL isOpen = [workspace openApplicationWithBundleID:bundleId];
+    if (!isOpen) {
+        // Reason for failing to open up the app is almost certainly because the phone is locked.
+        // Therefore set the flag to bring to the front after unlock to true.
+        foregroundAfterUnlock = YES;
+    }
+}
+
+/**
+ * Listen for device lock/unlock.
+ */
+- (void) registerAppforDetectLockState {
+    int notify_token;
+    notify_register_dispatch("com.apple.springboard.lockstate", &notify_token,dispatch_get_main_queue(), ^(int token) {
+        uint64_t state = UINT64_MAX;
+        notify_get_state(token, &state);
+        if(state == 0) {
+            if (foregroundAfterUnlock) {
+                [self foregroundApp];
+                foregroundAfterUnlock = NO;
+            }
+        }
+    });
 }
 
 @end
