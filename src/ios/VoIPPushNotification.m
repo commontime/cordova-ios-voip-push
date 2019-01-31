@@ -61,9 +61,12 @@
     
     for(NSString *apsKey in payloadDict)
     {
-        if ([apsKey compare:@"bringToFront"])
+        if ([apsKey compare:@"bringToFront"] == NSOrderedSame)
         {
-            [self foregroundApp];
+            if ([[payloadDict objectForKey:apsKey] boolValue])
+            {
+                [self foregroundApp];
+            }
         }
             
         id apsObject = [payloadDict objectForKey:apsKey];
