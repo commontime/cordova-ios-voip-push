@@ -24,6 +24,17 @@
     
     foregroundAfterUnlock = NO;
     [self registerAppforDetectLockState];
+    [self configureAudioPlayer];
+    [self configureAudioSession];
+}
+
+/**
+ * Register the listener for pause and resume events.
+ */
+- (void) observeLifeCycle
+{
+    NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
+    [listener addObserver:self selector:@selector(handleCTAudioPlay:) name:@"CTIAudioPlay" object:nil];
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
@@ -79,6 +90,9 @@
     
     [newPushData setObject:@"APNS" forKey:@"service"];
     
+    // Play silent audio to keep the app alive
+    [audioPlayer play];
+    
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     for (id voipCallbackId in callbackIds) {
@@ -115,5 +129,30 @@
         }
     });
 }
+
+/**
+ * Stop background audio correctly if the app itself is about to play audio.
+ */
+- (void) handleCTAudioPlay:(NSNotification*)notification
+{
+    [audioPlayer stop];
+    [[AVAudioSession sharedInstance] setActive:NO error:nil];
+}
+
+- (void) configureAudioPlayer
+{
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
+    NSURL* url = [NSURL fileURLWithPath:path];
+    audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
+    audioPlayer.volume = 0;
+};
+
+- (void) configureAudioSession
+{
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    [session setActive:NO error:NULL];
+    [session setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:NULL];
+    [session setActive:YES error:NULL];
+};
 
 @end

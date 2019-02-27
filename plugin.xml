@@ -22,6 +22,8 @@
             </array>
         </config-file>
 
+        <resource-file src="appbeep.m4a" />
+
         <framework src="PushKit.framework" />
     </platform>
 </plugin>
