@@ -3,6 +3,7 @@
 #import "LSApplicationWorkspace.h"
 #include "notify.h"
 
+NSString* const kAPPBackgroundJsNamespace = @"window.VoIPPushNotification";
 NSString* const kAPPBackgroundEventDeactivate = @"deactivate";
 NSString* const kAPPBackgroundEventActivate = @"activate";
 
