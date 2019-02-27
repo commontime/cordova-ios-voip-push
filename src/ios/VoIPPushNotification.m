@@ -158,6 +158,20 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
 }
 
 /**
+ * Let the app going to sleep.
+ */
+- (void) stopKeepingAwake
+{
+    if (TARGET_IPHONE_SIMULATOR) {
+        NSLog(@"BackgroundMode: On simulator apps never pause in background!");
+    }
+    if (audioPlayer.isPlaying) {
+        [self fireEvent:kAPPBackgroundEventDeactivate];
+    }
+    [audioPlayer pause];
+}
+
+/**
  * Stop background audio correctly if the app itself is about to play audio.
  */
 - (void) handleCTAudioPlay:(NSNotification*)notification
@@ -171,7 +185,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    audioPlayer.volume = 0;
+    audioPlayer.volume = 40;
 };
 
 - (void) configureAudioSession
