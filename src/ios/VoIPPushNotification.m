@@ -15,7 +15,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
 
 + (void)load
 {
-    [self swizzleWKWebViewEngine];
+    //[self swizzleWKWebViewEngine];
 }
 
 - (void)init:(CDVInvokedUrlCommand*)command
