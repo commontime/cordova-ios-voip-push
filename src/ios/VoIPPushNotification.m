@@ -15,7 +15,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
 
 + (void)load
 {
-    //[self swizzleWKWebViewEngine];
+    [self swizzleWKWebViewEngine];
 }
 
 - (void)init:(CDVInvokedUrlCommand*)command
@@ -226,7 +226,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     Class wkWebViewEngineCls = NSClassFromString(@"CDVWKWebViewEngine");
     SEL selector = NSSelectorFromString(@"createConfigurationFromSettings:");
     
-    SwizzleSelectorWithBlock_Begin(wkWebViewEngineCls, selector)
+    /*SwizzleSelectorWithBlock_Begin(wkWebViewEngineCls, selector)
     ^(CDVPlugin *self, NSDictionary *settings) {
         id obj = ((id (*)(id, SEL, NSDictionary*))_imp)(self, _cmd, settings);
         
@@ -235,7 +235,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
         
         return obj;
     }
-    SwizzleSelectorWithBlock_End;
+    SwizzleSelectorWithBlock_End;*/
 }
 
 @end
