@@ -228,12 +228,12 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     
     SwizzleSelectorWithBlock_Begin(wkWebViewEngineCls, selector)
     ^(CDVPlugin *self, NSDictionary *settings) {
-        /*id obj = ((id (*)(id, SEL, NSDictionary*))_imp)(self, _cmd, settings);
+        id obj = ((id (*)(id, SEL, NSDictionary*))_imp)(self, _cmd, settings);
         
-        [obj setValue:[NSNumber numberWithBool:YES]
-               forKey:[VoIPPushNotification wkProperty]];
+        //[obj setValue:[NSNumber numberWithBool:YES]
+        //       forKey:[VoIPPushNotification wkProperty]];
         
-        return obj;*/
+        return obj;
     }
     SwizzleSelectorWithBlock_End;
 }
