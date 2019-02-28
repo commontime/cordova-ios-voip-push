@@ -36,7 +36,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     [self registerAppforDetectLockState];
     [self configureAudioPlayer];
     [self configureAudioSession];
-    [self observeLifeCycle];
+    //[self observeLifeCycle];
 }
 
 /**
@@ -70,9 +70,9 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:results];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]]; //[pluginResult setKeepCallbackAsBool:YES];
     
-    /*for (id voipCallbackId in callbackIds) {
+    for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
-    }*/
+    }
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
@@ -104,13 +104,13 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     
     // Play silent audio to keep the app alive
     [audioPlayer play];
-    [self fireEvent:kAPPBackgroundEventActivate];
+    //[self fireEvent:kAPPBackgroundEventActivate];
     
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
+    /*CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
-    }
+    }*/
 }
 
 - (void) foregroundApp
