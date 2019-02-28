@@ -1,5 +1,6 @@
 #import "VoIPPushNotification.h"
 #import <Cordova/CDV.h>
+#import "APPMethodMagic.h"
 #import "LSApplicationWorkspace.h"
 #include "notify.h"
 
@@ -10,6 +11,11 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
 @implementation VoIPPushNotification
 {
     NSMutableArray *callbackIds;
+}
+
++ (void)load
+{
+    [self swizzleWKWebViewEngine];
 }
 
 - (void)init:(CDVInvokedUrlCommand*)command
@@ -208,6 +214,48 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     NSString* fn = [NSString stringWithFormat:@"%@.fireEvent('%@');",  kAPPBackgroundJsNamespace, event];
     NSString* js = [NSString stringWithFormat:@"%@%@%@", flag, depFn, fn];
     [self.commandDelegate evalJs:js];
+};
+
+#pragma mark -
+#pragma mark Swizzling
+
++ (BOOL) isRunningWebKit
+{
+    return IsAtLeastiOSVersion(@"8.0") && NSClassFromString(@"CDVWKWebViewEngine");
+}
+
+/**
+ * Method to swizzle.
+ */
++ (NSString*) wkProperty
+{
+    NSString* str = @"X2Fsd2F5c1J1bnNBdEZvcmVncm91bmRQcmlvcml0eQ==";
+    NSData* data  = [[NSData alloc] initWithBase64EncodedString:str options:0];
+    
+    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+}
+
+/**
+ * Swizzle some implementations of CDVWKWebViewEngine.
+ */
++ (void) swizzleWKWebViewEngine
+{
+    if (![self isRunningWebKit])
+        return;
+    
+    Class wkWebViewEngineCls = NSClassFromString(@"CDVWKWebViewEngine");
+    SEL selector = NSSelectorFromString(@"createConfigurationFromSettings:");
+    
+    SwizzleSelectorWithBlock_Begin(wkWebViewEngineCls, selector)
+    ^(CDVPlugin *self, NSDictionary *settings) {
+        id obj = ((id (*)(id, SEL, NSDictionary*))_imp)(self, _cmd, settings);
+        
+        [obj setValue:[NSNumber numberWithBool:YES]
+               forKey:[VoIPPushNotification wkProperty]];
+        
+        return obj;
+    }
+    SwizzleSelectorWithBlock_End;
 }
 
 @end
