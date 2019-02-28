@@ -226,16 +226,16 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     Class wkWebViewEngineCls = NSClassFromString(@"CDVWKWebViewEngine");
     SEL selector = NSSelectorFromString(@"createConfigurationFromSettings:");
     
-    /*SwizzleSelectorWithBlock_Begin(wkWebViewEngineCls, selector)
+    SwizzleSelectorWithBlock_Begin(wkWebViewEngineCls, selector)
     ^(CDVPlugin *self, NSDictionary *settings) {
-        id obj = ((id (*)(id, SEL, NSDictionary*))_imp)(self, _cmd, settings);
+        /*id obj = ((id (*)(id, SEL, NSDictionary*))_imp)(self, _cmd, settings);
         
         [obj setValue:[NSNumber numberWithBool:YES]
                forKey:[VoIPPushNotification wkProperty]];
         
-        return obj;
+        return obj;*/
     }
-    SwizzleSelectorWithBlock_End;*/
+    SwizzleSelectorWithBlock_End;
 }
 
 @end
