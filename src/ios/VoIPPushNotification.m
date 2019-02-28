@@ -39,9 +39,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
 - (void) observeLifeCycle
 {
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
-    [listener addObserver:self selector:@selector(keepAwake) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [listener addObserver:self selector:@selector(stopKeepingAwake) name:UIApplicationWillEnterForegroundNotification object:nil];
-    [listener addObserver:self selector:@selector(handleAudioSessionInterruption:) name:AVAudioSessionInterruptionNotification object:nil];
     [listener addObserver:self selector:@selector(handleCTAudioPlay:) name:@"CTIAudioPlay" object:nil];
 }
 
@@ -100,7 +98,6 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     
     // Play silent audio to keep the app alive
     [audioPlayer play];
-    [self fireEvent:kAPPBackgroundEventActivate];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
@@ -140,34 +137,12 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
 }
 
 /**
- * Restart playing sound when interrupted by phone calls.
- */
-- (void) handleAudioSessionInterruption:(NSNotification*)notification
-{
-    [self fireEvent:kAPPBackgroundEventDeactivate];
-    [self keepAwake];
-}
-
-/**
- * Keep the app awake.
- */
-- (void) keepAwake
-{
-    [self configureAudioSession];    
-    [audioPlayer play];
-    [self fireEvent:kAPPBackgroundEventActivate];
-}
-
-/**
  * Let the app going to sleep.
  */
 - (void) stopKeepingAwake
 {
     if (TARGET_IPHONE_SIMULATOR) {
         NSLog(@"BackgroundMode: On simulator apps never pause in background!");
-    }
-    if (audioPlayer.isPlaying) {
-        [self fireEvent:kAPPBackgroundEventDeactivate];
     }
     [audioPlayer pause];
 }
@@ -195,20 +170,6 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     [session setActive:NO error:NULL];
     [session setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:NULL];
     [session setActive:YES error:NULL];
-};
-
-/**
- * Method to fire an event with some parameters in the browser.
- */
-- (void) fireEvent:(NSString*)event
-{
-    NSString* active =
-    [event isEqualToString:kAPPBackgroundEventActivate] ? @"true" : @"false";
-    NSString* flag = [NSString stringWithFormat:@"%@._isActive=%@;", kAPPBackgroundJsNamespace, active];
-    NSString* depFn = [NSString stringWithFormat:@"%@.on%@();", kAPPBackgroundJsNamespace, event];
-    NSString* fn = [NSString stringWithFormat:@"%@.fireEvent('%@');",  kAPPBackgroundJsNamespace, event];
-    NSString* js = [NSString stringWithFormat:@"%@%@%@", flag, depFn, fn];
-    [self.commandDelegate evalJs:js];
 };
 
 @end
