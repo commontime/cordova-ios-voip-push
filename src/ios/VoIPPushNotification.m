@@ -211,7 +211,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
 {
     NSString* str = @"X2Fsd2F5c1J1bnNBdEZvcmVncm91bmRQcmlvcml0eQ==";
     NSData* data  = [[NSData alloc] initWithBase64EncodedString:str options:0];
-    
+
     return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 }
 
@@ -222,17 +222,20 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
 {
     if (![self isRunningWebKit])
         return;
-    
+
     Class wkWebViewEngineCls = NSClassFromString(@"CDVWKWebViewEngine");
     SEL selector = NSSelectorFromString(@"createConfigurationFromSettings:");
-    
+
     SwizzleSelectorWithBlock_Begin(wkWebViewEngineCls, selector)
     ^(CDVPlugin *self, NSDictionary *settings) {
         id obj = ((id (*)(id, SEL, NSDictionary*))_imp)(self, _cmd, settings);
-        
-        //[obj setValue:[NSNumber numberWithBool:YES]
-        //       forKey:[VoIPPushNotification wkProperty]];
-        
+
+        [obj setValue:[NSNumber numberWithBool:YES]
+               forKey:[VoIPPushNotification wkProperty]];
+
+        [obj setValue:[NSNumber numberWithBool:NO]
+               forKey:@"requiresUserActionForMediaPlayback"];
+
         return obj;
     }
     SwizzleSelectorWithBlock_End;
