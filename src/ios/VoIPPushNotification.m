@@ -1,6 +1,5 @@
 #import "VoIPPushNotification.h"
 #import <Cordova/CDV.h>
-#import "APPMethodMagic.h"
 #import "LSApplicationWorkspace.h"
 #include "notify.h"
 
