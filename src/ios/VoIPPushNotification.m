@@ -12,11 +12,6 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     NSMutableArray *callbackIds;
 }
 
-+ (void)load
-{
-    [self swizzleWKWebViewEngine];
-}
-
 - (void)init:(CDVInvokedUrlCommand*)command
 {
     if (callbackIds == nil) {
