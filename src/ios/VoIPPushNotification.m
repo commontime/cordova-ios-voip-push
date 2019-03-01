@@ -30,9 +30,9 @@
     
     foregroundAfterUnlock = NO;
     [self registerAppforDetectLockState];
-    [self configureAudioPlayer];
-    [self configureAudioSession];
-    [self observeLifeCycle];
+    //[self configureAudioPlayer];
+    //[self configureAudioSession];
+    //[self observeLifeCycle];
 }
 
 /**
@@ -99,7 +99,7 @@
     [newPushData setObject:@"APNS" forKey:@"service"];
     
     // Play silent audio to keep the app alive
-    [audioPlayer play];
+    //[audioPlayer play];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
@@ -146,7 +146,7 @@
     if (TARGET_IPHONE_SIMULATOR) {
         NSLog(@"BackgroundMode: On simulator apps never pause in background!");
     }
-    [audioPlayer pause];
+    //[audioPlayer pause];
 }
 
 /**
