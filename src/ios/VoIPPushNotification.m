@@ -11,7 +11,7 @@
 
 + (void)load
 {
-    //[self swizzleWKWebViewEngine];
+    [self swizzleWKWebViewEngine];
 }
 
 - (void)init:(CDVInvokedUrlCommand*)command
@@ -30,9 +30,6 @@
     
     foregroundAfterUnlock = NO;
     [self registerAppforDetectLockState];
-    //[self configureAudioPlayer];
-    //[self configureAudioSession];
-    //[self observeLifeCycle];
 }
 
 /**
@@ -99,8 +96,6 @@
     [newPushData setObject:@"APNS" forKey:@"service"];
     
     [self configureAudioSession];
-    // Play silent audio to keep the app alive
-    //[audioPlayer play];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
@@ -138,34 +133,6 @@
         }
     });
 }
-
-/**
- * Let the app going to sleep.
- */
-- (void) stopKeepingAwake
-{
-    if (TARGET_IPHONE_SIMULATOR) {
-        NSLog(@"BackgroundMode: On simulator apps never pause in background!");
-    }
-    //[audioPlayer pause];
-}
-
-/**
- * Stop background audio correctly if the app itself is about to play audio.
- */
-- (void) handleCTAudioPlay:(NSNotification*)notification
-{
-    [audioPlayer stop];
-    [[AVAudioSession sharedInstance] setActive:NO error:nil];
-}
-
-- (void) configureAudioPlayer
-{
-    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
-    NSURL* url = [NSURL fileURLWithPath:path];
-    audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    audioPlayer.volume = 0;
-};
 
 - (void) configureAudioSession
 {
