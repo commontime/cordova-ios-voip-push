@@ -31,7 +31,7 @@
     foregroundAfterUnlock = NO;
     [self registerAppforDetectLockState];
     //[self configureAudioPlayer];
-    //[self configureAudioSession];
+    [self configureAudioSession];
     //[self observeLifeCycle];
 }
 
