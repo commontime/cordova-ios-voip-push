@@ -31,7 +31,7 @@
     foregroundAfterUnlock = NO;
     [self registerAppforDetectLockState];
     //[self configureAudioPlayer];
-    [self configureAudioSession];
+    //[self configureAudioSession];
     //[self observeLifeCycle];
 }
 
@@ -98,6 +98,7 @@
     
     [newPushData setObject:@"APNS" forKey:@"service"];
     
+    [self configureAudioSession];
     // Play silent audio to keep the app alive
     //[audioPlayer play];
     
