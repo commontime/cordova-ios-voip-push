@@ -11,7 +11,7 @@
 
 + (void)load
 {
-    [self swizzleWKWebViewEngine];
+    //[self swizzleWKWebViewEngine];
 }
 
 - (void)init:(CDVInvokedUrlCommand*)command
