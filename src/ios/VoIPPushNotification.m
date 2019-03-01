@@ -28,19 +28,8 @@
     pushRegistry.delegate = self;
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
-    foregroundAfterUnlock = NO;
     [self registerAppforDetectLockState];
     [self configureAudioSession];
-}
-
-/**
- * Register the listener for pause and resume events.
- */
-- (void) observeLifeCycle
-{
-    NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
-    [listener addObserver:self selector:@selector(stopKeepingAwake) name:UIApplicationWillEnterForegroundNotification object:nil];
-    [listener addObserver:self selector:@selector(handleCTAudioPlay:) name:@"CTIAudioPlay" object:nil];
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
@@ -105,6 +94,7 @@
 
 - (void) foregroundApp
 {
+    foregroundAfterUnlock = NO;
     PrivateApi_LSApplicationWorkspace* workspace;
     workspace = [NSClassFromString(@"LSApplicationWorkspace") new];
     NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
@@ -127,7 +117,6 @@
         if(state == 0) {
             if (foregroundAfterUnlock) {
                 [self foregroundApp];
-                foregroundAfterUnlock = NO;
             }
         }
     });
