@@ -30,6 +30,7 @@
     
     foregroundAfterUnlock = NO;
     [self registerAppforDetectLockState];
+    [self configureAudioSession];
 }
 
 /**
@@ -94,8 +95,6 @@
     }
     
     [newPushData setObject:@"APNS" forKey:@"service"];
-    
-    [self configureAudioSession];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
