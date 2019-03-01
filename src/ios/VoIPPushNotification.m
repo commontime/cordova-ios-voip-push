@@ -15,7 +15,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
 
 + (void)load
 {
-    //[self swizzleWKWebViewEngine];
+    [self swizzleWKWebViewEngine];
 }
 
 - (void)init:(CDVInvokedUrlCommand*)command
@@ -36,7 +36,7 @@ NSString* const kAPPBackgroundEventActivate = @"activate";
     [self registerAppforDetectLockState];
     [self configureAudioPlayer];
     [self configureAudioSession];
-    //[self observeLifeCycle];
+    [self observeLifeCycle];
 }
 
 /**
