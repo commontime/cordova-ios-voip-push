@@ -95,7 +95,7 @@
 
     if (!foregrounded) {
         UILocalNotification *notification = [[UILocalNotification alloc] init];
-        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:5];
+        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:6];
         notification.alertBody = @"New Message Received";
         notification.timeZone = [NSTimeZone defaultTimeZone];
         [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
