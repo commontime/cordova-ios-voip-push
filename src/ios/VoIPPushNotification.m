@@ -66,7 +66,7 @@
     NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
 
     UILocalNotification *notification = [[UILocalNotification alloc] init];
-    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:1];
+    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
     notification.alertBody = @"New Message Received";
     notification.timeZone = [NSTimeZone defaultTimeZone];
     [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
