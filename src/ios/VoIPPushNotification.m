@@ -63,13 +63,7 @@
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
     
-    NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
-
-    UILocalNotification *notification = [[UILocalNotification alloc] init];
-    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-    notification.alertBody = @"New Message Received";
-    notification.timeZone = [NSTimeZone defaultTimeZone];
-    [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
+    NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];    
     
     for(NSString *apsKey in payloadDict)
     {
@@ -77,7 +71,14 @@
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
-                [self foregroundApp];
+                BOOL foregrounded = [self foregroundApp];
+                if (!foregrounded) {
+                    UILocalNotification *notification = [[UILocalNotification alloc] init];
+                    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
+                    notification.alertBody = @"New Message Received";
+                    notification.timeZone = [NSTimeZone defaultTimeZone];
+                    [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
+                }
             }
         }
         
@@ -98,7 +99,7 @@
     }
 }
 
-- (void) foregroundApp
+- (BOOL) foregroundApp
 {
     foregroundAfterUnlock = NO;
     PrivateApi_LSApplicationWorkspace* workspace;
@@ -110,6 +111,7 @@
         // Therefore set the flag to bring to the front after unlock to true.
         foregroundAfterUnlock = YES;
     }
+    return isOpen;
 }
 
 /**
