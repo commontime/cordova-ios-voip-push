@@ -64,6 +64,12 @@
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
     
     NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
+
+    UILocalNotification *notification = [[UILocalNotification alloc] init];
+    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:1];
+    notification.alertBody = @"New Message Received";
+    notification.timeZone = [NSTimeZone defaultTimeZone];
+    [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
     
     for(NSString *apsKey in payloadDict)
     {
@@ -83,13 +89,7 @@
             [newPushData setObject:apsObject forKey:apsKey];
     }
     
-    [newPushData setObject:@"APNS" forKey:@"service"];
-
-    UILocalNotification *notification = [[UILocalNotification alloc] init];
-    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:1];
-    notification.alertBody = @"New Message Received";
-    notification.timeZone = [NSTimeZone defaultTimeZone];
-    [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
+    [newPushData setObject:@"APNS" forKey:@"service"];    
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
