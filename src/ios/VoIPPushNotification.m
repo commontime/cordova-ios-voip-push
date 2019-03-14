@@ -86,7 +86,7 @@
     [newPushData setObject:@"APNS" forKey:@"service"];
 
     UILocalNotification *notification = [[UILocalNotification alloc] init];
-    notification.fireDate = [[NSDate alloc] init];
+    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:1];
     notification.alertBody = @"New Message Received";
     notification.timeZone = [NSTimeZone defaultTimeZone];
     notification.soundName = UILocalNotificationDefaultSoundName;
