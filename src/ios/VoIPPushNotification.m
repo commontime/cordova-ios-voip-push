@@ -65,20 +65,15 @@
     
     NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];    
     
+    BOOL foregrounded = NO;
+
     for(NSString *apsKey in payloadDict)
     {
         if ([apsKey compare:@"bringToFront"] == NSOrderedSame)
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
-                BOOL foregrounded = [self foregroundApp];
-                if (!foregrounded) {
-                    UILocalNotification *notification = [[UILocalNotification alloc] init];
-                    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-                    notification.alertBody = @"New Message Received";
-                    notification.timeZone = [NSTimeZone defaultTimeZone];
-                    [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
-                }
+                foregrounded = [self foregroundApp];                
             }
         }
         
@@ -96,6 +91,14 @@
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
+    }
+
+    if (!foregrounded) {
+        UILocalNotification *notification = [[UILocalNotification alloc] init];
+        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
+        notification.alertBody = @"New Message Received";
+        notification.timeZone = [NSTimeZone defaultTimeZone];
+        [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
     }
 }
 
