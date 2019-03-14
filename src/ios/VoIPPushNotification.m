@@ -89,8 +89,6 @@
     notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:1];
     notification.alertBody = @"New Message Received";
     notification.timeZone = [NSTimeZone defaultTimeZone];
-    notification.soundName = UILocalNotificationDefaultSoundName;
-    notification.applicationIconBadgeNumber = 0;
     [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
