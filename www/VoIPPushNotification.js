@@ -110,6 +110,10 @@ VoIPPushNotification.prototype.emit = function() {
     return true;
 };
 
+VoIPPushNotification.prototype.clearNotification = function (success, fail) {
+    exec(success, fail, 'VoIPPushNotification', 'clearNotification');
+}
+
 /*!
  * VoIP Push Notification Plugin.
  */
@@ -126,11 +130,7 @@ module.exports = {
 
     init: function(options) {
         return new VoIPPushNotification(options);
-    },
-
-    clearNotification: function(success, fail) {
-        exec(success, fail, 'VoIPPushNotification', 'clearNotification');
-    },
+    }
 
     /**
      * VoIPPushNotification Object.
