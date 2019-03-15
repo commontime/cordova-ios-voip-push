@@ -44,10 +44,6 @@ var VoIPPushNotification = function() {
     }, 10);
 };
 
-var clearNotification = function() {
-    exec(success, fail, 'VoIPPushNotification', 'clearNotification');
-}
-
 /**
  * Listen for an event.
  *
@@ -130,6 +126,10 @@ module.exports = {
 
     init: function(options) {
         return new VoIPPushNotification(options);
+    },
+
+    clearNotification: function() {
+        exec(success, fail, 'VoIPPushNotification', 'clearNotification');
     },
 
     /**
