@@ -128,7 +128,7 @@ module.exports = {
         return new VoIPPushNotification(options);
     },
 
-    clearNotification: function() {
+    clearNotification: function(success, fail) {
         exec(success, fail, 'VoIPPushNotification', 'clearNotification');
     },
 

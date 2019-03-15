@@ -106,8 +106,14 @@
 
 - (void) clearNotification
 {
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     if (notification) {
         [[UIApplication sharedApplication] cancelLocalNotification:notification];
+    } else {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No notification to cancel"];
+    }
+    for (id voipCallbackId in callbackIds) {
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
     }
 }
 
