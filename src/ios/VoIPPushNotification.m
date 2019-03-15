@@ -7,7 +7,7 @@
 @implementation VoIPPushNotification
 {
     NSMutableArray *callbackIds;
-    UILocalNotification *notification
+    UILocalNotification *notification;
 }
 
 + (void)load
@@ -95,6 +95,7 @@
     }
 
     if (!foregrounded) {
+        [self clearNotification];
         notification = [[UILocalNotification alloc] init];
         notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
         notification.alertBody = @"New Message Received";
