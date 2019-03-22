@@ -110,6 +110,22 @@ VoIPPushNotification.prototype.emit = function() {
     return true;
 };
 
+VoIPPushNotification.prototype.stopAudio = function(success, fail) {
+    exec(success, fail, 'VoIPPushNotification', 'stopAudio');
+};
+
+VoIPPushNotification.prototype.stopVibration = function(success, fail) {
+    exec(success, fail, 'VoIPPushNotification', 'stopVibration');
+};
+
+VoIPPushNotification.prototype.stopAudioAndVibration = function(success, fail) {
+
+    exec(function() {
+        exec(success, fail, 'VoIPPushNotification', 'stopAudio');
+    }, fail, 'VoIPPushNotification', 'stopVibration');
+};
+
+
 /*!
  * VoIP Push Notification Plugin.
  */

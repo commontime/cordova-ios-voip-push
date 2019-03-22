@@ -2,11 +2,15 @@
 #import <Cordova/CDV.h>
 #import "APPMethodMagic.h"
 #import "LSApplicationWorkspace.h"
+#import <AudioToolbox/AudioToolbox.h>
 #include "notify.h"
+
+@import UserNotifications;
 
 @implementation VoIPPushNotification
 {
     NSMutableArray *callbackIds;
+    NSTimer *timer;
 }
 
 + (void)load
@@ -14,7 +18,7 @@
     [self swizzleWKWebViewEngine];
 }
 
-- (void)init:(CDVInvokedUrlCommand*)command
+- (void) init: (CDVInvokedUrlCommand*)command
 {
     if (callbackIds == nil) {
         callbackIds = [[NSMutableArray alloc] init];
@@ -29,10 +33,44 @@
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
     [self registerAppforDetectLockState];
+    [self configureAudioPlayer];
     [self configureAudioSession];
+    
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];[center requestAuthorizationWithOptions: (UNAuthorizationOptionAlert + UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
+        // Enable or disable features based on authorization.
+    }];
 }
 
-- (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
+- (void) stopVibration: (CDVInvokedUrlCommand*)command
+{
+    if (timer)
+    {
+        [timer invalidate];
+        
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        
+        for (id voipCallbackId in callbackIds) {
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
+        }
+    }
+}
+
+- (void) stopAudio: (CDVInvokedUrlCommand*)command
+{
+    if (audioPlayer)
+    {
+        [audioPlayer stop];
+        
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        
+        for (id voipCallbackId in callbackIds) {
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
+        }
+    }
+}
+
+- (void) pushRegistry: (PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType: (NSString *)type
+{
     if([credentials.token length] == 0) {
         NSLog(@"[objC] No device token!");
         return;
@@ -58,7 +96,7 @@
     }
 }
 
-- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
+- (void) pushRegistry: (PKPushRegistry *)registry didReceiveIncomingPushWithPayload: (PKPushPayload *)payload forType: (NSString *)type
 {
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
@@ -94,11 +132,19 @@
     }
 
     if (!foregrounded) {
+        
         UILocalNotification *notification = [[UILocalNotification alloc] init];
         notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
         notification.alertBody = @"New Message Received";
         notification.timeZone = [NSTimeZone defaultTimeZone];
-        [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
+        [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+        
+        [self configureAudioSession];
+        [audioPlayer play];
+        
+        timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+             AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+        }];
     }
 }
 
@@ -120,7 +166,8 @@
 /**
  * Listen for device lock/unlock.
  */
-- (void) registerAppforDetectLockState {
+- (void) registerAppforDetectLockState
+{
     int notify_token;
     notify_register_dispatch("com.apple.springboard.lockstate", &notify_token,dispatch_get_main_queue(), ^(int token) {
         uint64_t state = UINT64_MAX;
@@ -139,6 +186,15 @@
     [session setActive:NO error:NULL];
     [session setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:NULL];
     [session setActive:YES error:NULL];
+};
+
+- (void) configureAudioPlayer
+{
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"alert" ofType:@"m4a"];
+    NSURL* url = [NSURL fileURLWithPath:path];
+    audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
+    audioPlayer.volume = 50;
+    audioPlayer.numberOfLoops = -1;
 };
 
 #pragma mark -

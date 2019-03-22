@@ -24,6 +24,8 @@
             </array>
         </config-file>
 
+        <resource-file src="alert.m4a" />
+
         <framework src="PushKit.framework" />
     </platform>
 </plugin>
