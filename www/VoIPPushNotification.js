@@ -124,6 +124,10 @@ VoIPPushNotification.prototype.stopAudioAndVibration = function(success, fail) {
     }, fail);
 };
 
+VoIPPushNotification.prototype.didInitialiseApp = function(success) {
+    exec(success, null, 'VoIPPushNotification', 'didInitialiseApp');
+};
+
 
 /*!
  * VoIP Push Notification Plugin.

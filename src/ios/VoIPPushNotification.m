@@ -11,6 +11,7 @@
 {
     NSMutableArray *callbackIds;
     NSTimer *timer;
+    BOOL appBroughtToFront;
 }
 
 + (void)load
@@ -54,6 +55,12 @@
     if (audioPlayer) [audioPlayer stop];
         
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) didInitialiseApp: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:appBroughtToFront];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
@@ -147,6 +154,8 @@
         // Reason for failing to open up the app is almost certainly because the phone is locked.
         // Therefore set the flag to bring to the front after unlock to true.
         foregroundAfterUnlock = YES;
+    } else {
+        appBroughtToFront = YES;
     }
     return isOpen;
 }
