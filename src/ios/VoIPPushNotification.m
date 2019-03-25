@@ -43,30 +43,18 @@
 
 - (void) stopVibration: (CDVInvokedUrlCommand*)command
 {
-    if (timer)
-    {
-        [timer invalidate];
+    if (timer) [timer invalidate];
         
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        
-        for (id voipCallbackId in callbackIds) {
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
-        }
-    }
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void) stopAudio: (CDVInvokedUrlCommand*)command
 {
-    if (audioPlayer)
-    {
-        [audioPlayer stop];
+    if (audioPlayer) [audioPlayer stop];
         
-        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        
-        for (id voipCallbackId in callbackIds) {
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
-        }
-    }
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void) pushRegistry: (PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType: (NSString *)type

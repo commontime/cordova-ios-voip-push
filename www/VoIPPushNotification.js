@@ -119,10 +119,9 @@ VoIPPushNotification.prototype.stopVibration = function(success, fail) {
 };
 
 VoIPPushNotification.prototype.stopAudioAndVibration = function(success, fail) {
-
-    exec(function() {
-        exec(success, fail, 'VoIPPushNotification', 'stopAudio');
-    }, fail, 'VoIPPushNotification', 'stopVibration');
+    VoIPPushNotification.prototype.stopAudio(function() {
+        VoIPPushNotification.prototype.stopVibration(success, fail);
+    }, fail);
 };
 
 
