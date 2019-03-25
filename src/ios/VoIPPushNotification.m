@@ -39,6 +39,9 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     [self configureAudioPlayer];
     [self configureAudioSession];
     
+    NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
+    [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];[center requestAuthorizationWithOptions: (UNAuthorizationOptionAlert + UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
         // Enable or disable features based on authorization.
     }];
@@ -47,7 +50,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
 - (void) stopVibration: (CDVInvokedUrlCommand*)command
 {
     if (timer) [timer invalidate];
-        
+    
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -55,7 +58,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
 - (void) stopAudio: (CDVInvokedUrlCommand*)command
 {
     if (audioPlayer) [audioPlayer stop];
-        
+    
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -123,17 +126,17 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
     
-    NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];    
+    NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
     
     BOOL foregrounded = NO;
-
+    
     for(NSString *apsKey in payloadDict)
     {
         if ([apsKey compare:@"bringToFront"] == NSOrderedSame)
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
-                foregrounded = [self foregroundApp];                
+                foregrounded = [self foregroundApp];
             }
         }
         
@@ -145,14 +148,14 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
             [newPushData setObject:apsObject forKey:apsKey];
     }
     
-    [newPushData setObject:@"APNS" forKey:@"service"];    
+    [newPushData setObject:@"APNS" forKey:@"service"];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
     }
-
+    
     if (!foregrounded) {
         
         UILocalNotification *notification = [[UILocalNotification alloc] init];
@@ -165,7 +168,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
         [audioPlayer play];
         
         timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
-             AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+            AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
         }];
     }
 }
@@ -185,6 +188,11 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
         appBroughtToFront = YES;
     }
     return isOpen;
+}
+
+- (void) appBackgrounded
+{
+    appBroughtToFront = NO;
 }
 
 /**
