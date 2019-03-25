@@ -128,6 +128,22 @@ VoIPPushNotification.prototype.didInitialiseApp = function(success) {
     exec(success, null, 'VoIPPushNotification', 'didInitialiseApp');
 };
 
+VoIPPushNotification.prototype.supressProcessing = function(doSupress, success) {
+    exec(success, null, 'VoIPPushNotification', 'supressProcessing', [doSupress]);
+};
+
+VoIPPushNotification.prototype.addToIgnoreList = function(messageId, success, fail) {
+    exec(success, fail, 'VoIPPushNotification', 'addToIgnoreList', [messageId]);
+};
+
+VoIPPushNotification.prototype.removeFromIgnoreList = function(messageId, success, fail) {
+    exec(success, fail, 'VoIPPushNotification', 'removeFromIgnoreList', [messageId]);
+};
+
+VoIPPushNotification.prototype.checkIgnoreList = function(messageId, success, fail) {
+    exec(success, fail, 'VoIPPushNotification', 'checkIgnoreList', [messageId]);
+};
+
 
 /*!
  * VoIP Push Notification Plugin.

@@ -7,6 +7,8 @@
 
 @import UserNotifications;
 
+static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
+
 @implementation VoIPPushNotification
 {
     NSMutableArray *callbackIds;
@@ -64,6 +66,29 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void) supressProcessing: (CDVInvokedUrlCommand*)command
+{
+    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    {
+        [self setSupressProcessing:[[command.arguments objectAtIndex:0] boolValue]];
+    }
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) setSupressProcessing: (BOOL) supress
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    [preferences setBool:supress forKey:SUPRESS_PROCESSING_KEY];
+    [preferences synchronize];
+}
+
+- (BOOL) getSupressProcessing
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    return [preferences boolForKey:SUPRESS_PROCESSING_KEY];
+}
+
 - (void) pushRegistry: (PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType: (NSString *)type
 {
     if([credentials.token length] == 0) {
@@ -93,6 +118,8 @@
 
 - (void) pushRegistry: (PKPushRegistry *)registry didReceiveIncomingPushWithPayload: (PKPushPayload *)payload forType: (NSString *)type
 {
+    if ([self getSupressProcessing]) return;
+    
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
     
