@@ -1,6 +1,5 @@
 #import "VoIPPushNotification.h"
 #import <Cordova/CDV.h>
-#import "APPMethodMagic.h"
 #import "LSApplicationWorkspace.h"
 #import "DBManager.h"
 #include "notify.h"
@@ -10,11 +9,6 @@
 static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
 
 @implementation VoIPPushNotification
-
-+ (void) load
-{
-    [self swizzleWKWebViewEngine];
-}
 
 - (void) onAppTerminate
 {
@@ -247,7 +241,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     
     if (!foregrounded) {
         
-        [self setDeviceVolume: 1.0];
+        [self setDeviceVolume: 0.9];
         [self configureAudioSession];
         [audioPlayer play];
         [self removeVolumeSlider];
@@ -319,48 +313,5 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     audioPlayer.volume = 100;
     audioPlayer.numberOfLoops = -1;
 };
-
-#pragma mark Swizzling
-
-+ (BOOL) isRunningWebKit
-{
-    return IsAtLeastiOSVersion(@"8.0") && NSClassFromString(@"CDVWKWebViewEngine");
-}
-
-/**
- * Method to swizzle.
- */
-+ (NSString*) wkProperty
-{
-    NSString* str = @"X2Fsd2F5c1J1bnNBdEZvcmVncm91bmRQcmlvcml0eQ==";
-    NSData* data  = [[NSData alloc] initWithBase64EncodedString:str options:0];
-    return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-}
-
-/**
- * Swizzle some implementations of CDVWKWebViewEngine.
- */
-+ (void) swizzleWKWebViewEngine
-{
-    if (![self isRunningWebKit])
-        return;
-    
-    Class wkWebViewEngineCls = NSClassFromString(@"CDVWKWebViewEngine");
-    SEL selector = NSSelectorFromString(@"createConfigurationFromSettings:");
-    
-    SwizzleSelectorWithBlock_Begin(wkWebViewEngineCls, selector)
-    ^(CDVPlugin *self, NSDictionary *settings) {
-        id obj = ((id (*)(id, SEL, NSDictionary*))_imp)(self, _cmd, settings);
-        
-        [obj setValue:[NSNumber numberWithBool:YES]
-               forKey:[VoIPPushNotification wkProperty]];
-        
-        [obj setValue:[NSNumber numberWithBool:NO]
-               forKey:@"requiresUserActionForMediaPlayback"];
-        
-        return obj;
-    }
-    SwizzleSelectorWithBlock_End;
-}
 
 @end

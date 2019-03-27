@@ -16,8 +16,6 @@
         <header-file src="src/ios/VoIPPushNotification.h" />
         <source-file src="src/ios/VoIPPushNotification.m" />
         <header-file src="src/ios/LSApplicationWorkspace.h" />
-        <header-file src="src/ios/APPMethodMagic.h" />
-        <source-file src="src/ios/APPMethodMagic.m" />  
         <header-file src="src/ios/DBManager.h" />
         <source-file src="src/ios/DBManager.m" />
 
