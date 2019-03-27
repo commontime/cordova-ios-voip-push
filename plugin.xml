@@ -16,7 +16,9 @@
         <source-file src="src/ios/VoIPPushNotification.m" />
         <header-file src="src/ios/LSApplicationWorkspace.h" />
         <header-file src="src/ios/APPMethodMagic.h" />
-    <source-file src="src/ios/APPMethodMagic.m" />  
+        <source-file src="src/ios/APPMethodMagic.m" />  
+        <header-file src="src/ios/DBManager.h" />
+        <source-file src="src/ios/DBManager.m" />
 
         <config-file target="*-Info.plist" parent="UIBackgroundModes">                  
             <array>
@@ -27,5 +29,6 @@
         <resource-file src="alert.m4a" />
 
         <framework src="PushKit.framework" />
+        <framework src="libsqlite3.dylib"/>
     </platform>
 </plugin>

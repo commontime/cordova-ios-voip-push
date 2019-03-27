@@ -3,6 +3,7 @@
 #import "APPMethodMagic.h"
 #import "LSApplicationWorkspace.h"
 #import <AudioToolbox/AudioToolbox.h>
+#import "DBManager.h"
 #include "notify.h"
 
 @import UserNotifications;
@@ -10,16 +11,18 @@
 static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
 
 @implementation VoIPPushNotification
-{
-    NSMutableArray *callbackIds;
-    NSTimer *timer;
-    BOOL appBroughtToFront;
-}
 
-+ (void)load
++ (void) load
 {
     [self swizzleWKWebViewEngine];
 }
+
+- (void) onAppTerminate
+{
+    [[DBManager getSharedInstance] closeDB];
+}
+
+#pragma mark JS Functions
 
 - (void) init: (CDVInvokedUrlCommand*)command
 {
@@ -79,6 +82,41 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void) addToIgnoreList: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Database failure"];
+    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    {
+        BOOL success = [[DBManager getSharedInstance] addMessage:[command.arguments objectAtIndex:0]];
+        if (success) pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:success];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) removeFromIgnoreList: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Database failure"];
+    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    {
+        BOOL success = [[DBManager getSharedInstance] deleteMessage:[command.arguments objectAtIndex:0]];
+        if (success) pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsBool:success];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) checkIgnoreList: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Database failure"];
+    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    {
+        BOOL exists = [[DBManager getSharedInstance] exists:[command.arguments objectAtIndex:0]];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:exists];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+#pragma mark Non JS Functions
+
 - (void) setSupressProcessing: (BOOL) supress
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
@@ -130,7 +168,21 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     
     BOOL foregrounded = NO;
     
-    for(NSString *apsKey in payloadDict)
+    for (NSString *apsKey in payloadDict)
+    {
+        if ([apsKey compare:@"timestamp"] == NSOrderedSame)
+        {
+            if (![[payloadDict objectForKey:apsKey] isEqual:[NSNull null]])
+            {
+                if ([[DBManager getSharedInstance] exists:[payloadDict objectForKey:apsKey]])
+                {
+                    return;
+                }
+            }
+        }
+    }
+    
+    for (NSString *apsKey in payloadDict)
     {
         if ([apsKey compare:@"bringToFront"] == NSOrderedSame)
         {
@@ -229,7 +281,6 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     audioPlayer.numberOfLoops = -1;
 };
 
-#pragma mark -
 #pragma mark Swizzling
 
 + (BOOL) isRunningWebKit

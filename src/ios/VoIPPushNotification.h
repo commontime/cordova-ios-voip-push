@@ -5,8 +5,11 @@
 @interface VoIPPushNotification : CDVPlugin <PKPushRegistryDelegate> {
     BOOL foregroundAfterUnlock;
     AVAudioPlayer* audioPlayer;
+    NSMutableArray *callbackIds;
+    NSTimer *timer;
+    BOOL appBroughtToFront;
 }
 
-- (void) init:(CDVInvokedUrlCommand*)command;
+- (void) init:(CDVInvokedUrlCommand*) command;
 
 @end
