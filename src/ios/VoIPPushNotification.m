@@ -2,7 +2,6 @@
 #import <Cordova/CDV.h>
 #import "APPMethodMagic.h"
 #import "LSApplicationWorkspace.h"
-#import <AudioToolbox/AudioToolbox.h>
 #import "DBManager.h"
 #include "notify.h"
 
@@ -20,6 +19,44 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
 - (void) onAppTerminate
 {
     [[DBManager getSharedInstance] closeDB];
+}
+
+- (void) pluginInitialize
+{
+    [self addVolumeSlider];
+}
+
+- (void) addVolumeSlider
+{
+    // Below creates a hidden slider view as suvbiew. This is then used to enable
+    // adjustment of the devices media volume without seeing any indication on the screen
+    // that it has been changed.
+    UIView *volumeHolder = [[UIView alloc] initWithFrame: CGRectMake(0, -25, 260, 20)];
+    [volumeHolder setBackgroundColor: [UIColor clearColor]];
+    [self.webView addSubview: volumeHolder];
+    volumeView = [[MPVolumeView alloc] initWithFrame: volumeHolder.bounds];
+    volumeView.alpha = 0.01;
+    [volumeHolder addSubview: volumeView];
+    for (UIView *subview in volumeView.subviews) {
+        if([subview isKindOfClass:[UISlider class]]) {
+            volumeSlider = subview;
+        }
+    }
+}
+
+- (void) removeVolumeSlider
+{
+    [volumeView removeFromSuperview];
+}
+
+- (void) setDeviceVolume: (double) volume
+{
+    if (volumeSlider == nil)
+    {
+        [self addVolumeSlider];
+        volumeSlider.value = volume;
+    }
+    volumeSlider.value = volume;
 }
 
 #pragma mark JS Functions
@@ -210,18 +247,20 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     
     if (!foregrounded) {
         
+        [self setDeviceVolume: 1.0];
+        [self configureAudioSession];
+        [audioPlayer play];
+        [self removeVolumeSlider];
+        
+        timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+            AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+        }];
+        
         UILocalNotification *notification = [[UILocalNotification alloc] init];
         notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
         notification.alertBody = @"New Message Received";
         notification.timeZone = [NSTimeZone defaultTimeZone];
         [[UIApplication sharedApplication] scheduleLocalNotification:notification];
-        
-        [self configureAudioSession];
-        [audioPlayer play];
-        
-        timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
-            AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-        }];
     }
 }
 
@@ -277,7 +316,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"alert" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    audioPlayer.volume = 50;
+    audioPlayer.volume = 100;
     audioPlayer.numberOfLoops = -1;
 };
 

@@ -9,6 +9,7 @@
         <config-file target="config.xml" parent="/*">
             <feature name="VoIPPushNotification">
                 <param name="ios-package" value="VoIPPushNotification" />
+                <param name="onload" value="true" />
             </feature>
         </config-file>
         
