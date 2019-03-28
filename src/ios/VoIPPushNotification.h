@@ -9,6 +9,7 @@
     NSTimer *timer;
     MPVolumeView *volumeView;
     UISlider *volumeSlider;
+    NSString *stopAudioCallback;
     BOOL appBroughtToFront;
     BOOL foregroundAfterUnlock;
     BOOL stopAudioLooping;
