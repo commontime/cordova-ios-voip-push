@@ -120,7 +120,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
 
 - (void) addToIgnoreList: (CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Database failure"];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to add message"];
     if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
     {
         BOOL success = [[DBManager getSharedInstance] addMessage:[command.arguments objectAtIndex:0]];
@@ -131,7 +131,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
 
 - (void) removeFromIgnoreList: (CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Database failure"];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to remove message"];
     if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
     {
         BOOL success = [[DBManager getSharedInstance] deleteMessage:[command.arguments objectAtIndex:0]];
@@ -142,7 +142,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
 
 - (void) checkIgnoreList: (CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Database failure"];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to check for message"];
     if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
     {
         BOOL exists = [[DBManager getSharedInstance] exists:[command.arguments objectAtIndex:0]];
