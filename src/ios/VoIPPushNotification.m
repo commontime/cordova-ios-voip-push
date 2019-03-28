@@ -77,7 +77,6 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
     
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];[center requestAuthorizationWithOptions: (UNAuthorizationOptionAlert + UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
-        // Enable or disable features based on authorization.
     }];
 }
 
@@ -91,10 +90,16 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
 
 - (void) stopAudio: (CDVInvokedUrlCommand*)command
 {
-    if (audioPlayer) [audioPlayer stop];
-    
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    if (!audioPlayer.isPlaying)
+    {
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
+    else
+    {
+        stopAudioLooping = YES;
+        stopAudioCallback = command.callbackId;
+    }
 }
 
 - (void) didInitialiseApp: (CDVInvokedUrlCommand*)command
@@ -310,8 +315,27 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"alert" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    audioPlayer.volume = 100;
-    audioPlayer.numberOfLoops = -1;
+    audioPlayer.delegate = self;
+    audioPlayer.volume = 1.0;
 };
+
+- (void) audioPlayerDidFinishPlaying: (AVAudioPlayer *) player successfully: (BOOL) flag
+{
+    if (stopAudioLooping)
+    {
+        [audioPlayer stop];
+        stopAudioLooping = NO;
+        if (![stopAudioCallback isEqual:[NSNull null]])
+        {
+            CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:stopAudioCallback];
+            stopAudioCallback = nil;
+        }
+    }
+    else
+    {
+        [audioPlayer play];
+    }
+}
 
 @end
