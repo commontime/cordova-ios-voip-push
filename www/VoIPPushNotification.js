@@ -110,41 +110,6 @@ VoIPPushNotification.prototype.emit = function() {
     return true;
 };
 
-VoIPPushNotification.prototype.stopAudio = function(success, fail) {
-    exec(success, fail, 'VoIPPushNotification', 'stopAudio');
-};
-
-VoIPPushNotification.prototype.stopVibration = function(success, fail) {
-    exec(success, fail, 'VoIPPushNotification', 'stopVibration');
-};
-
-VoIPPushNotification.prototype.stopAudioAndVibration = function(success, fail) {
-    VoIPPushNotification.prototype.stopAudio(function() {
-        VoIPPushNotification.prototype.stopVibration(success, fail);
-    }, fail);
-};
-
-VoIPPushNotification.prototype.didInitialiseApp = function(success) {
-    exec(success, null, 'VoIPPushNotification', 'didInitialiseApp');
-};
-
-VoIPPushNotification.prototype.supressProcessing = function(doSupress, success) {
-    exec(success, null, 'VoIPPushNotification', 'supressProcessing', [doSupress]);
-};
-
-VoIPPushNotification.prototype.addToIgnoreList = function(messageId, success, fail) {
-    exec(success, fail, 'VoIPPushNotification', 'addToIgnoreList', [messageId]);
-};
-
-VoIPPushNotification.prototype.removeFromIgnoreList = function(messageId, success, fail) {
-    exec(success, fail, 'VoIPPushNotification', 'removeFromIgnoreList', [messageId]);
-};
-
-VoIPPushNotification.prototype.checkIgnoreList = function(messageId, success, fail) {
-    exec(success, fail, 'VoIPPushNotification', 'checkIgnoreList', [messageId]);
-};
-
-
 /*!
  * VoIP Push Notification Plugin.
  */
@@ -161,6 +126,40 @@ module.exports = {
 
     init: function(options) {
         return new VoIPPushNotification(options);
+    },
+
+    stopAudio: function(success, fail) {
+        exec(success, fail, 'VoIPPushNotification', 'stopAudio');
+    },
+
+    stopVibration: function(success, fail) {
+        exec(success, fail, 'VoIPPushNotification', 'stopVibration');
+    },
+
+    stopAudioAndVibration: function(success, fail) {
+        window.VoIPPushNotification.stopAudio(function() {
+            window.VoIPPushNotification.stopVibration(success, fail);
+        }, fail);
+    },
+
+    didInitialiseApp: function(success) {
+        exec(success, null, 'VoIPPushNotification', 'didInitialiseApp');
+    },
+
+    supressProcessing: function(doSupress, success) {
+        exec(success, null, 'VoIPPushNotification', 'supressProcessing', [doSupress]);
+    },
+
+    addToIgnoreList: function(messageId, success, fail) {
+        exec(success, fail, 'VoIPPushNotification', 'addToIgnoreList', [messageId]);
+    },
+
+    removeFromIgnoreList: function(messageId, success, fail) {
+        exec(success, fail, 'VoIPPushNotification', 'removeFromIgnoreList', [messageId]);
+    },
+
+    checkIgnoreList: function(messageId, success, fail) {
+        exec(success, fail, 'VoIPPushNotification', 'checkIgnoreList', [messageId]);
     },
 
     /**
