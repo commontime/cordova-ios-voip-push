@@ -225,6 +225,23 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
                 foregrounded = [self foregroundApp];
+                if (!foregrounded) {
+                    
+                    [self setDeviceVolume: 0.9];
+                    [self configureAudioSession];
+                    [audioPlayer play];
+                    [self removeVolumeSlider];
+                    
+                    timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+                        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+                    }];
+                    
+                    UILocalNotification *notification = [[UILocalNotification alloc] init];
+                    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
+                    notification.alertBody = @"New Message Received";
+                    notification.timeZone = [NSTimeZone defaultTimeZone];
+                    [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+                }
             }
         }
         
@@ -242,24 +259,6 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
-    }
-    
-    if (!foregrounded) {
-        
-        [self setDeviceVolume: 0.9];
-        [self configureAudioSession];
-        [audioPlayer play];
-        [self removeVolumeSlider];
-        
-        timer = [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
-            AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-        }];
-        
-        UILocalNotification *notification = [[UILocalNotification alloc] init];
-        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-        notification.alertBody = @"New Message Received";
-        notification.timeZone = [NSTimeZone defaultTimeZone];
-        [[UIApplication sharedApplication] scheduleLocalNotification:notification];
     }
 }
 
