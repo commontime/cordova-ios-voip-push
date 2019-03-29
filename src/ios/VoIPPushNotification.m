@@ -7,6 +7,10 @@
 @import UserNotifications;
 
 static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
+static NSString* ALERT_KEY = @"alert";
+static NSString* TIMESTAMP_KEY = @"timestamp";
+static NSString* BRING_TO_FRONT_KEY = @"bringToFront";
+static NSString* MESSAGE_KEY = @"message";
 
 @implementation VoIPPushNotification
 
@@ -206,29 +210,22 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     
     long messageTimestamp = -1;
     
-    for (NSString *apsKey in payloadDict)
+    if ([self containsKey: payloadDict: TIMESTAMP_KEY])
     {
-        if ([apsKey compare:@"timestamp"] == NSOrderedSame)
-        {
-            if (![[payloadDict objectForKey:apsKey] isEqual:[NSNull null]])
-            {
-                messageTimestamp = [[payloadDict objectForKey:apsKey] longValue];
-            }
-        }
+        NSString* timestampStr = [payloadDict objectForKey: TIMESTAMP_KEY];
+        messageTimestamp = [timestampStr longLongValue];
     }
     
     // If a timestamp can't be found at the aps level, look for it in the alert object.
     if (messageTimestamp == -1)
     {
-        for (NSString *apsKey in payloadDict)
+        if ([self containsKey: payloadDict: ALERT_KEY])
         {
-            if ([apsKey compare:@"alert"] == NSOrderedSame)
+            NSDictionary* apsAlertObject = [payloadDict objectForKey: ALERT_KEY];
+            if ([self containsKey: apsAlertObject: TIMESTAMP_KEY])
             {
-                id apsObject = [payloadDict objectForKey:apsKey];
-                if (![[apsObject objectForKey:@"timestamp"] isEqual:[NSNull null]])
-                {
-                    messageTimestamp = [[apsObject objectForKey:@"timestamp"] longValue];
-                }
+                NSString* timestampStr = [apsAlertObject objectForKey: TIMESTAMP_KEY];
+                messageTimestamp = [timestampStr longLongValue];
             }
         }
     }
@@ -240,7 +237,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     
     for (NSString *apsKey in payloadDict)
     {
-        if ([apsKey compare:@"bringToFront"] == NSOrderedSame)
+        if ([apsKey compare: BRING_TO_FRONT_KEY] == NSOrderedSame)
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
@@ -267,8 +264,8 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
         
         id apsObject = [payloadDict objectForKey:apsKey];
         
-        if([apsKey compare:@"alert"] == NSOrderedSame)
-            [newPushData setObject:apsObject forKey:@"message"];
+        if([apsKey compare: ALERT_KEY] == NSOrderedSame)
+            [newPushData setObject:apsObject forKey: MESSAGE_KEY];
         else
             [newPushData setObject:apsObject forKey:apsKey];
     }
@@ -280,6 +277,13 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
     }
+}
+
+- (BOOL) containsKey: (NSDictionary*) dict: (NSString*) key {
+    BOOL retVal = 0;
+    NSArray *allKeys = [dict allKeys];
+    retVal = [allKeys containsObject:key];
+    return retVal;
 }
 
 - (BOOL) foregroundApp
