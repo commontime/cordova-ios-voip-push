@@ -123,7 +123,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to add message"];
     if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
     {
-        BOOL success = [[DBManager getSharedInstance] addMessage:[command.arguments objectAtIndex:0]];
+        BOOL success = [[DBManager getSharedInstance] addMessage:[[command.arguments objectAtIndex:0] longValue]];
         if (success) pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:success];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -134,7 +134,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to remove message"];
     if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
     {
-        BOOL success = [[DBManager getSharedInstance] deleteMessage:[command.arguments objectAtIndex:0]];
+        BOOL success = [[DBManager getSharedInstance] deleteMessage:[[command.arguments objectAtIndex:0] longValue]];
         if (success) pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsBool:success];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -145,7 +145,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to check for message"];
     if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
     {
-        BOOL exists = [[DBManager getSharedInstance] exists:[command.arguments objectAtIndex:0]];
+        BOOL exists = [[DBManager getSharedInstance] exists:[[command.arguments objectAtIndex:0] longValue]];
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:exists];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -210,7 +210,7 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
         {
             if (![[payloadDict objectForKey:apsKey] isEqual:[NSNull null]])
             {
-                if ([[DBManager getSharedInstance] exists:[payloadDict objectForKey:apsKey]])
+                if ([[DBManager getSharedInstance] exists:[[payloadDict objectForKey:apsKey] longValue]])
                 {
                     return;
                 }

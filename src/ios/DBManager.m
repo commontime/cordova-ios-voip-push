@@ -100,7 +100,7 @@ static NSString *DATE = @"date";
     return success;
 }
 
-- (BOOL) addMessage: (NSString*) messageId;
+- (BOOL) addMessage: (long) messageId;
 {
     if ([self exists:messageId]) return NO;
     
@@ -109,7 +109,7 @@ static NSString *DATE = @"date";
     const char *dbpath = [databasePath UTF8String];
     if (sqlite3_open(dbpath, &database) == SQLITE_OK)
     {
-        NSString *insertSQL = [NSString stringWithFormat:@"INSERT INTO %@ (%@, %@) values (\"%@\", \"%@\")", TABLE_IGNORE, MESSAGE_ID, DATE, messageId, [[NSDate alloc] init]];
+        NSString *insertSQL = [NSString stringWithFormat:@"INSERT INTO %@ (%@, %@) values (%ld, \"%@\")", TABLE_IGNORE, MESSAGE_ID, DATE, messageId, [[NSDate alloc] init]];
         const char *insert_stmt = [insertSQL UTF8String];
         sqlite3_prepare_v2(database, insert_stmt,-1, &statement, NULL);
         if (sqlite3_step(statement) == SQLITE_DONE)
@@ -121,10 +121,10 @@ static NSString *DATE = @"date";
     return success;
 }
 
-- (BOOL) deleteMessage: (NSString*) messageId;
+- (BOOL) deleteMessage: (long) messageId;
 {
     BOOL success = NO;
-    NSString *querySQL = [NSString stringWithFormat: @"SELECT %@ FROM %@ WHERE %@=\"%@\"", KEY_ID, TABLE_IGNORE, MESSAGE_ID, messageId];
+    NSString *querySQL = [NSString stringWithFormat: @"SELECT %@ FROM %@ WHERE %@=%ld", KEY_ID, TABLE_IGNORE, MESSAGE_ID, messageId];
     const char *query_stmt = [querySQL UTF8String];
     if (sqlite3_prepare_v2(database, query_stmt, -1, &statement, NULL) == SQLITE_OK)
     {
@@ -149,10 +149,10 @@ static NSString *DATE = @"date";
     return success;
 }
 
-- (BOOL) exists: (NSString*) messageId
+- (BOOL) exists: (long) messageId
 {
     BOOL success = NO;
-    NSString *querySQL = [NSString stringWithFormat: @"SELECT COUNT(*) FROM %@ WHERE %@=\"%@\"", TABLE_IGNORE, MESSAGE_ID, messageId];
+    NSString *querySQL = [NSString stringWithFormat: @"SELECT COUNT(*) FROM %@ WHERE %@=%ld", TABLE_IGNORE, MESSAGE_ID, messageId];
     const char *query_stmt = [querySQL UTF8String];
     int count = 0;
     if (sqlite3_prepare_v2(database, query_stmt, -1, &statement, NULL) == SQLITE_OK)
