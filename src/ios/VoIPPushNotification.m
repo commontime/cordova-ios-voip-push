@@ -204,18 +204,38 @@ static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
     
     BOOL foregrounded = NO;
     
+    long messageTimestamp = -1;
+    
     for (NSString *apsKey in payloadDict)
     {
         if ([apsKey compare:@"timestamp"] == NSOrderedSame)
         {
             if (![[payloadDict objectForKey:apsKey] isEqual:[NSNull null]])
             {
-                if ([[DBManager getSharedInstance] exists:[[payloadDict objectForKey:apsKey] longValue]])
+                messageTimestamp = [[payloadDict objectForKey:apsKey] longValue];
+            }
+        }
+    }
+    
+    // If a timestamp can't be found at the aps level, look for it in the alert object.
+    if (messageTimestamp == -1)
+    {
+        for (NSString *apsKey in payloadDict)
+        {
+            if ([apsKey compare:@"alert"] == NSOrderedSame)
+            {
+                id apsObject = [payloadDict objectForKey:apsKey];
+                if (![[apsObject objectForKey:@"timestamp"] isEqual:[NSNull null]])
                 {
-                    return;
+                    messageTimestamp = [[apsObject objectForKey:@"timestamp"] longValue];
                 }
             }
         }
+    }
+    
+    if (messageTimestamp != -1 && [[DBManager getSharedInstance] exists:messageTimestamp])
+    {
+        return;
     }
     
     for (NSString *apsKey in payloadDict)
