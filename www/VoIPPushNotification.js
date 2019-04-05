@@ -128,6 +128,26 @@ module.exports = {
         return new VoIPPushNotification(options);
     },
 
+    didInitialiseApp: function(success) {
+        exec(success, null, 'VoIPPushNotification', 'didInitialiseApp');
+    },
+
+    supressProcessing: function(doSupress, success) {
+        exec(success, null, 'VoIPPushNotification', 'supressProcessing', [doSupress]);
+    },
+
+    addToIgnoreList: function(messageId, success, fail) {
+        exec(success, fail, 'VoIPPushNotification', 'addToIgnoreList', [messageId]);
+    },
+
+    removeFromIgnoreList: function(messageId, success, fail) {
+        exec(success, fail, 'VoIPPushNotification', 'removeFromIgnoreList', [messageId]);
+    },
+
+    checkIgnoreList: function(messageId, success, fail) {
+        exec(success, fail, 'VoIPPushNotification', 'checkIgnoreList', [messageId]);
+    },
+
     /**
      * VoIPPushNotification Object.
      *

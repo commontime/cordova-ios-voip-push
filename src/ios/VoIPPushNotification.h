@@ -4,6 +4,7 @@
 
 @interface VoIPPushNotification : CDVPlugin <PKPushRegistryDelegate> {
     BOOL foregroundAfterUnlock;
+    BOOL appBroughtToFront;
     AVAudioPlayer* audioPlayer;
 }
 

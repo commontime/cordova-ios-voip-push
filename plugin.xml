@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="com.nikola-breznjak.voippush" version="1.0.9" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="com.nikola-breznjak.voippush" version="1.0.10" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>VoIPPushNotification</name>
     <js-module name="VoIPPushNotification" src="www/VoIPPushNotification.js">
         <clobbers target="VoIPPushNotification" />
@@ -9,6 +9,7 @@
         <config-file target="config.xml" parent="/*">
             <feature name="VoIPPushNotification">
                 <param name="ios-package" value="VoIPPushNotification" />
+                <param name="onload" value="true" />
             </feature>
         </config-file>
         
@@ -16,7 +17,9 @@
         <source-file src="src/ios/VoIPPushNotification.m" />
         <header-file src="src/ios/LSApplicationWorkspace.h" />
         <header-file src="src/ios/APPMethodMagic.h" />
-    <source-file src="src/ios/APPMethodMagic.m" />  
+        <source-file src="src/ios/APPMethodMagic.m" />  
+        <header-file src="src/ios/DBManager.h" />
+        <source-file src="src/ios/DBManager.m" />
 
         <config-file target="*-Info.plist" parent="UIBackgroundModes">                  
             <array>
@@ -25,5 +28,6 @@
         </config-file>
 
         <framework src="PushKit.framework" />
+        <framework src="libsqlite3.dylib"/>
     </platform>
 </plugin>

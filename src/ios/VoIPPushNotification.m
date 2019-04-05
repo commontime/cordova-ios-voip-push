@@ -2,17 +2,33 @@
 #import <Cordova/CDV.h>
 #import "APPMethodMagic.h"
 #import "LSApplicationWorkspace.h"
+#import "DBManager.h"
 #include "notify.h"
+
+@import UserNotifications;
+
+static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
+static NSString* ALERT_KEY = @"alert";
+static NSString* TIMESTAMP_KEY = @"timestamp";
+static NSString* BRING_TO_FRONT_KEY = @"bringToFront";
+static NSString* MESSAGE_KEY = @"message";
 
 @implementation VoIPPushNotification
 {
     NSMutableArray *callbackIds;
 }
 
+- (void) onAppTerminate
+{
+    [[DBManager getSharedInstance] closeDB];
+}
+
 + (void)load
 {
     [self swizzleWKWebViewEngine];
 }
+
+#pragma mark JS Functions
 
 - (void)init:(CDVInvokedUrlCommand*)command
 {
@@ -30,6 +46,76 @@
     
     [self registerAppforDetectLockState];
     [self configureAudioSession];
+
+    NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
+    [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];[center requestAuthorizationWithOptions: (UNAuthorizationOptionAlert + UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
+    }];
+}
+
+- (void) didInitialiseApp: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:appBroughtToFront];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) supressProcessing: (CDVInvokedUrlCommand*)command
+{
+    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    {
+        [self setSupressProcessing:[[command.arguments objectAtIndex:0] boolValue]];
+    }
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) addToIgnoreList: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to add message"];
+    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    {
+        BOOL success = [[DBManager getSharedInstance] addMessage:[[command.arguments objectAtIndex:0] longValue]];
+        if (success) pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:success];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) removeFromIgnoreList: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to remove message"];
+    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    {
+        BOOL success = [[DBManager getSharedInstance] deleteMessage:[[command.arguments objectAtIndex:0] longValue]];
+        if (success) pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsBool:success];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) checkIgnoreList: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to check for message"];
+    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    {
+        BOOL exists = [[DBManager getSharedInstance] exists:[[command.arguments objectAtIndex:0] longValue]];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:exists];
+    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+#pragma mark Non JS Functions
+
+- (void) setSupressProcessing: (BOOL) supress
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    [preferences setBool:supress forKey:SUPRESS_PROCESSING_KEY];
+    [preferences synchronize];
+}
+
+- (BOOL) getSupressProcessing
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    return [preferences boolForKey:SUPRESS_PROCESSING_KEY];
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
@@ -60,46 +146,82 @@
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
+    if ([self getSupressProcessing]) return;
+    
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
     
-    NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];    
+    NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
     
     BOOL foregrounded = NO;
-
-    for(NSString *apsKey in payloadDict)
+    
+    long messageTimestamp = -1;
+    
+    if ([self containsKey: payloadDict: TIMESTAMP_KEY])
     {
-        if ([apsKey compare:@"bringToFront"] == NSOrderedSame)
+        NSString* timestampStr = [payloadDict objectForKey: TIMESTAMP_KEY];
+        messageTimestamp = [timestampStr longLongValue];
+    }
+    
+    // If a timestamp can't be found at the aps level, look for it in the alert object.
+    if (messageTimestamp == -1)
+    {
+        if ([self containsKey: payloadDict: ALERT_KEY])
+        {
+            NSDictionary* apsAlertObject = [payloadDict objectForKey: ALERT_KEY];
+            if ([self containsKey: apsAlertObject: TIMESTAMP_KEY])
+            {
+                NSString* timestampStr = [apsAlertObject objectForKey: TIMESTAMP_KEY];
+                messageTimestamp = [timestampStr longLongValue];
+            }
+        }
+    }
+    
+    if (messageTimestamp != -1 && [[DBManager getSharedInstance] exists:messageTimestamp])
+    {
+        return;
+    }
+    
+    for (NSString *apsKey in payloadDict)
+    {
+        if ([apsKey compare: BRING_TO_FRONT_KEY] == NSOrderedSame)
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
-                foregrounded = [self foregroundApp];                
+                foregrounded = [self foregroundApp];
+                if (!foregrounded)
+                {                    
+                    UILocalNotification *notification = [[UILocalNotification alloc] init];
+                    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
+                    notification.alertBody = @"New Message Received";
+                    notification.timeZone = [NSTimeZone defaultTimeZone];
+                    [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+                }
             }
         }
         
         id apsObject = [payloadDict objectForKey:apsKey];
         
-        if([apsKey compare:@"alert"] == NSOrderedSame)
-            [newPushData setObject:apsObject forKey:@"message"];
+        if([apsKey compare: ALERT_KEY] == NSOrderedSame)
+            [newPushData setObject:apsObject forKey: MESSAGE_KEY];
         else
             [newPushData setObject:apsObject forKey:apsKey];
     }
     
-    [newPushData setObject:@"APNS" forKey:@"service"];    
+    [newPushData setObject:@"APNS" forKey:@"service"];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
     }
+}
 
-    if (!foregrounded) {
-        UILocalNotification *notification = [[UILocalNotification alloc] init];
-        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-        notification.alertBody = @"New Message Received";
-        notification.timeZone = [NSTimeZone defaultTimeZone];
-        [[UIApplication sharedApplication] scheduleLocalNotification:notification];  
-    }
+- (BOOL) containsKey: (NSDictionary*) dict: (NSString*) key {
+    BOOL retVal = 0;
+    NSArray *allKeys = [dict allKeys];
+    retVal = [allKeys containsObject:key];
+    return retVal;
 }
 
 - (BOOL) foregroundApp
@@ -113,8 +235,15 @@
         // Reason for failing to open up the app is almost certainly because the phone is locked.
         // Therefore set the flag to bring to the front after unlock to true.
         foregroundAfterUnlock = YES;
+    } else {
+        appBroughtToFront = YES;
     }
     return isOpen;
+}
+
+- (void) appBackgrounded
+{
+    appBroughtToFront = NO;
 }
 
 /**
@@ -154,7 +283,7 @@
  */
 + (NSString*) wkProperty
 {
-    NSString* str = @"X2Fsd2F5c1J1bnNBdEZvcmVncm91bmRQcmlvcml0eQ==";
+    NSString* str = @"YWx3YXlzUnVuc0F0Rm9yZWdyb3VuZFByaW9yaXR5";
     NSData* data  = [[NSData alloc] initWithBase64EncodedString:str options:0];
     return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 }
