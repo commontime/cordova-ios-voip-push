@@ -73,9 +73,9 @@ static NSString* MESSAGE_KEY = @"message";
 - (void) addToIgnoreList: (CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to add message"];
-    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    if (![[command.arguments objectAtIndex:0] isEqual: [NSNull null]])
     {
-        BOOL success = [[DBManager getSharedInstance] addMessage:[[command.arguments objectAtIndex:0] longValue]];
+        BOOL success = [[DBManager getSharedInstance] addMessage:[command.arguments objectAtIndex:0]];
         if (success) pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:success];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -84,9 +84,9 @@ static NSString* MESSAGE_KEY = @"message";
 - (void) removeFromIgnoreList: (CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to remove message"];
-    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    if (![[command.arguments objectAtIndex:0] isEqual: [NSNull null]])
     {
-        BOOL success = [[DBManager getSharedInstance] deleteMessage:[[command.arguments objectAtIndex:0] longValue]];
+        BOOL success = [[DBManager getSharedInstance] deleteMessage:[command.arguments objectAtIndex:0]];
         if (success) pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsBool:success];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -95,9 +95,9 @@ static NSString* MESSAGE_KEY = @"message";
 - (void) checkIgnoreList: (CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to check for message"];
-    if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
+    if (![[command.arguments objectAtIndex:0] isEqual: [NSNull null]])
     {
-        BOOL exists = [[DBManager getSharedInstance] exists:[[command.arguments objectAtIndex:0] longValue]];
+        BOOL exists = [[DBManager getSharedInstance] exists:[command.arguments objectAtIndex:0]];
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:exists];
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -155,29 +155,27 @@ static NSString* MESSAGE_KEY = @"message";
     
     BOOL foregrounded = NO;
     
-    long messageTimestamp = -1;
+    NSString* messageTimestamp;
     
     if ([self containsKey: payloadDict: TIMESTAMP_KEY])
     {
-        NSString* timestampStr = [payloadDict objectForKey: TIMESTAMP_KEY];
-        messageTimestamp = [timestampStr longLongValue];
+        messageTimestamp = [payloadDict objectForKey: TIMESTAMP_KEY];
     }
     
     // If a timestamp can't be found at the aps level, look for it in the alert object.
-    if (messageTimestamp == -1)
+    if ([messageTimestamp isEqual: [NSNull null]])
     {
         if ([self containsKey: payloadDict: ALERT_KEY])
         {
             NSDictionary* apsAlertObject = [payloadDict objectForKey: ALERT_KEY];
             if ([self containsKey: apsAlertObject: TIMESTAMP_KEY])
             {
-                NSString* timestampStr = [apsAlertObject objectForKey: TIMESTAMP_KEY];
-                messageTimestamp = [timestampStr longLongValue];
+                messageTimestamp =  [apsAlertObject objectForKey: TIMESTAMP_KEY];
             }
         }
     }
     
-    if (messageTimestamp != -1 && [[DBManager getSharedInstance] exists:messageTimestamp])
+    if (![messageTimestamp isEqual: [NSNull null]] && [[DBManager getSharedInstance] exists: messageTimestamp])
     {
         return;
     }

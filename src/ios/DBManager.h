@@ -11,9 +11,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL) openDB;
 - (void) closeDB;
 - (BOOL) createDB;
-- (BOOL) addMessage: (long) messageId;
-- (BOOL) deleteMessage: (long) messageId;
-- (BOOL) exists: (long) messageId;
+- (BOOL) addMessage: (NSString*) messageId;
+- (BOOL) deleteMessage: (NSString*) messageId;
+- (BOOL) exists: (NSString*) messageId;
 
 @end
 
