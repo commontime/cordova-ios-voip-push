@@ -7,7 +7,7 @@
 
 @import UserNotifications;
 
-static NSString* SUPRESS_PROCESSING_KEY = @"supressProcessing";
+static NSString* SUPPRESS_PROCESSING_KEY = @"suppressProcessing";
 static NSString* ALERT_KEY = @"alert";
 static NSString* TIMESTAMP_KEY = @"timestamp";
 static NSString* BRING_TO_FRONT_KEY = @"bringToFront";
@@ -60,15 +60,22 @@ static NSString* MESSAGE_KEY = @"message";
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void) supressProcessing: (CDVInvokedUrlCommand*)command
+- (void) suppressProcessing: (CDVInvokedUrlCommand*)command
 {
     if (![[command.arguments objectAtIndex:0] isEqual:[NSNull null]])
     {
-        [self setSupressProcessing:[[command.arguments objectAtIndex:0] boolValue]];
+        [self setSuppressProcessing:[[command.arguments objectAtIndex:0] boolValue]];
     }
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
+
+- (void) isSuppressingProcessing: (CDVInvokedUrlCommand*)command
+{
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:[self getSuppressProcessing]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 
 - (void) addToIgnoreList: (CDVInvokedUrlCommand*)command
 {
@@ -105,17 +112,17 @@ static NSString* MESSAGE_KEY = @"message";
 
 #pragma mark Non JS Functions
 
-- (void) setSupressProcessing: (BOOL) supress
+- (void) setSuppressProcessing: (BOOL) supress
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    [preferences setBool:supress forKey:SUPRESS_PROCESSING_KEY];
+    [preferences setBool:supress forKey:SUPPRESS_PROCESSING_KEY];
     [preferences synchronize];
 }
 
-- (BOOL) getSupressProcessing
+- (BOOL) getSuppressProcessing
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    return [preferences boolForKey:SUPRESS_PROCESSING_KEY];
+    return [preferences boolForKey:SUPPRESS_PROCESSING_KEY];
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
@@ -146,7 +153,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    if ([self getSupressProcessing]) return;
+    if ([self getSuppressProcessing]) return;
     
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);

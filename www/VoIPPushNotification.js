@@ -132,8 +132,12 @@ module.exports = {
         exec(success, null, 'VoIPPushNotification', 'didInitialiseApp');
     },
 
-    supressProcessing: function(doSupress, success) {
-        exec(success, null, 'VoIPPushNotification', 'supressProcessing', [doSupress]);
+    suppressProcessing: function(doSupress, success) {
+        exec(success, null, 'VoIPPushNotification', 'suppressProcessing', [doSupress]);
+    },
+
+    isSuppressingProcessing: function(success) {
+        exec(success, null, 'VoIPPushNotification', 'isSuppressingProcessing');
     },
 
     addToIgnoreList: function(messageId, success, fail) {
