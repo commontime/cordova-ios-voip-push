@@ -45,7 +45,6 @@ static NSString* MESSAGE_KEY = @"message";
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
     [self registerAppforDetectLockState];
-    [self configureAudioSession];
 
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
     [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
@@ -232,8 +231,7 @@ static NSString* MESSAGE_KEY = @"message";
 - (BOOL) foregroundApp
 {
     foregroundAfterUnlock = NO;
-    PrivateApi_LSApplicationWorkspace* workspace;
-    workspace = [NSClassFromString(@"LSApplicationWorkspace") new];
+    PrivateApi_LSApplicationWorkspace* workspace = [NSClassFromString(@"LSApplicationWorkspace") new];
     NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
     BOOL isOpen = [workspace openApplicationWithBundleID:bundleId];
     if (!isOpen) {
@@ -260,20 +258,20 @@ static NSString* MESSAGE_KEY = @"message";
         uint64_t state = UINT64_MAX;
         notify_get_state(token, &state);
         if(state == 0) {
-            if (foregroundAfterUnlock) {
-                [self foregroundApp];
-            }
+            NSTimer *timer = [NSTimer timerWithTimeInterval:1.0 repeats:NO block:^(NSTimer * _Nonnull timer) {
+                if (foregroundAfterUnlock) {
+                    UIApplicationState state = [[UIApplication sharedApplication] applicationState];
+                    if (state == UIApplicationStateBackground || state == UIApplicationStateInactive) {
+                        [self foregroundApp];
+                    } else {
+                        foregroundAfterUnlock = NO;
+                    }
+                }
+            }];
+            [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
         }
     });
 }
-
-- (void) configureAudioSession
-{
-    AVAudioSession* session = [AVAudioSession sharedInstance];
-    [session setActive:NO error:NULL];
-    [session setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:NULL];
-    [session setActive:YES error:NULL];
-};
 
 #pragma mark -
 #pragma mark Swizzling
