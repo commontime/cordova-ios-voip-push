@@ -45,7 +45,8 @@ static NSString* MESSAGE_KEY = @"message";
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
     [self registerAppforDetectLockState];
-
+    [self configureAudioSession];
+        
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
     [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
     
@@ -272,6 +273,14 @@ static NSString* MESSAGE_KEY = @"message";
         }
     });
 }
+
+- (void) configureAudioSession
+{
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    [session setActive:NO error:NULL];
+    [session setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:NULL];
+    [session setActive:YES error:NULL];
+};
 
 #pragma mark -
 #pragma mark Swizzling
