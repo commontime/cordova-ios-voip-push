@@ -80,6 +80,18 @@ VoIPPushNotification.prototype.off = function (eventName, handle) {
 };
 
 /**
+ * Remove all event listeners for a specific event.
+ *
+ * @param {String} eventName to match subscription.
+ */
+
+VoIPPushNotification.prototype.offAll = function (eventName) {
+    if (this._handlers.hasOwnProperty(eventName)) {
+        this._handlers[eventName] = [];
+    }
+};
+
+/**
  * Emit an event.
  *
  * This is intended for internal use only.
