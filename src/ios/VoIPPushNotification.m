@@ -162,29 +162,35 @@ static NSString* MESSAGE_KEY = @"message";
     
     BOOL foregrounded = NO;
     
-    NSString* messageTimestamp;
+    long messageTimestamp = -1;
     
     if ([self containsKey: payloadDict: TIMESTAMP_KEY])
     {
-        messageTimestamp = [payloadDict objectForKey: TIMESTAMP_KEY];
+        messageTimestamp = [[payloadDict objectForKey: TIMESTAMP_KEY] longLongValue];
     }
     
     // If a timestamp can't be found at the aps level, look for it in the alert object.
-    if ([messageTimestamp isEqual: [NSNull null]])
+    if (messageTimestamp == -1)
     {
         if ([self containsKey: payloadDict: ALERT_KEY])
         {
             NSDictionary* apsAlertObject = [payloadDict objectForKey: ALERT_KEY];
             if ([self containsKey: apsAlertObject: TIMESTAMP_KEY])
             {
-                messageTimestamp =  [apsAlertObject objectForKey: TIMESTAMP_KEY];
+                messageTimestamp = [[apsAlertObject objectForKey: TIMESTAMP_KEY] longLongValue];
             }
         }
     }
     
-    if (![messageTimestamp isEqual: [NSNull null]] && [[DBManager getSharedInstance] exists: messageTimestamp])
-    {
-        return;
+    NSString *messageTimestampStr;
+    
+    if (messageTimestamp != -1) {
+        
+        messageTimestampStr = [NSString stringWithFormat:@"%ld", messageTimestamp];
+        if ([[DBManager getSharedInstance] exists: messageTimestampStr])
+        {
+            return;
+        }
     }
     
     for (NSString *apsKey in payloadDict)
@@ -198,7 +204,7 @@ static NSString* MESSAGE_KEY = @"message";
                 {                    
                     UILocalNotification *notification = [[UILocalNotification alloc] init];
                     notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-                    notification.alertBody = [NSString stringWithFormat:@"[%@] New Message Received", messageTimestamp];
+                    notification.alertBody = [NSString stringWithFormat:@"[%@] New Message Received", messageTimestampStr];
                     notification.timeZone = [NSTimeZone defaultTimeZone];
                     [[UIApplication sharedApplication] scheduleLocalNotification:notification];
                 }
