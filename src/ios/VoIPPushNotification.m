@@ -291,7 +291,7 @@ static NSString* MESSAGE_KEY = @"message";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    audioPlayer.volume = 0;
+    audioPlayer.volume = 100;
 };
 
 /**
