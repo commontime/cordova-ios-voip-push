@@ -29,5 +29,7 @@
 
         <framework src="PushKit.framework" />
         <framework src="libsqlite3.dylib"/>
+
+        <resource-file src="appbeep.m4a" />
     </platform>
 </plugin>

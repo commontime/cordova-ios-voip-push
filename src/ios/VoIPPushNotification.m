@@ -45,6 +45,7 @@ static NSString* MESSAGE_KEY = @"message";
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
     [self registerAppforDetectLockState];
+    [self configureAudioPlayer];
     [self configureAudioSession];
         
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
@@ -157,6 +158,8 @@ static NSString* MESSAGE_KEY = @"message";
     
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
+    
+    [audioPlayer play];
     
     NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
     
@@ -280,6 +283,20 @@ static NSString* MESSAGE_KEY = @"message";
     });
 }
 
+/**
+ * Configure the audio player.
+ */
+- (void) configureAudioPlayer
+{
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
+    NSURL* url = [NSURL fileURLWithPath:path];
+    audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
+    audioPlayer.volume = 0;
+};
+
+/**
+ * Configure the audio session.
+ */
 - (void) configureAudioSession
 {
     AVAudioSession* session = [AVAudioSession sharedInstance];
