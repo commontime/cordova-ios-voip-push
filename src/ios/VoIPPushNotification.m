@@ -154,12 +154,15 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    if ([self getSuppressProcessing]) return;
+    [audioPlayer play];
+    
+    if ([self getSuppressProcessing]) {
+        [audioPlayer stop];
+        return;
+    };
     
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
-    
-    [audioPlayer play];
     
     NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
     
@@ -192,6 +195,7 @@ static NSString* MESSAGE_KEY = @"message";
         messageTimestampStr = [NSString stringWithFormat:@"%ld", messageTimestamp];
         if ([[DBManager getSharedInstance] exists: messageTimestampStr])
         {
+            [audioPlayer stop];
             return;
         }
     }
@@ -291,7 +295,7 @@ static NSString* MESSAGE_KEY = @"message";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    audioPlayer.volume = 100;
+    audioPlayer.volume = 0;
 };
 
 /**
