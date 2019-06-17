@@ -211,7 +211,7 @@ static NSString* MESSAGE_KEY = @"message";
                 {                    
                     UILocalNotification *notification = [[UILocalNotification alloc] init];
                     notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-                    notification.alertBody = [NSString stringWithFormat:@"[%@] New Message Received", messageTimestampStr];
+                    notification.alertBody = @"New Message Received";
                     notification.timeZone = [NSTimeZone defaultTimeZone];
                     [[UIApplication sharedApplication] scheduleLocalNotification:notification];
                 }
