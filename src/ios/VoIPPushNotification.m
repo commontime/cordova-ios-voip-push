@@ -118,6 +118,7 @@ static NSString* MESSAGE_KEY = @"message";
 - (void) playSilentAudio:(CDVInvokedUrlCommand*)command
 {
     long duration = 1;
+    float volume = 0;
     
     @try {
         duration = [[command argumentAtIndex:0] longLongValue];
