@@ -6,6 +6,7 @@
     BOOL foregroundAfterUnlock;
     BOOL appBroughtToFront;
     AVAudioPlayer* audioPlayer;
+    float volume;
 }
 
 - (void) init:(CDVInvokedUrlCommand*)command;

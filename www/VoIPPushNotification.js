@@ -164,6 +164,10 @@ module.exports = {
         exec(success, fail, 'VoIPPushNotification', 'checkIgnoreList', [messageId]);
     },
 
+    playSilentAudio: function (successCallback, errorCallback, duration, volumeOverride) {
+        cordova.exec(successCallback, errorCallback, 'VoIPPushNotification', 'playSilentAudio', [duration, volumeOverride]);        
+    },
+
     /**
      * VoIPPushNotification Object.
      *

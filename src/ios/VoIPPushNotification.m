@@ -111,6 +111,33 @@ static NSString* MESSAGE_KEY = @"message";
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+/*
+**
+* Play silent audio
+*/
+- (void) playSilentAudio:(CDVInvokedUrlCommand*)command
+{
+    long duration = 1;
+    
+    @try {
+        duration = [[command argumentAtIndex:0] longLongValue];
+    } @catch (NSException *exception) {}
+    
+    @try {
+        volume = [[command argumentAtIndex:1] floatValue];
+        volume = volume / 100;
+    } @catch (NSException *exception) {}
+    
+    audioPlayer.volume = volume;
+    [audioPlayer play];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (duration / 1000) * NSEC_PER_SEC), dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
+        [audioPlayer stop];
+    });
+    
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+}
+
 #pragma mark Non JS Functions
 
 - (void) setSuppressProcessing: (BOOL) supress
