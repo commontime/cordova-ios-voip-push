@@ -46,7 +46,11 @@ static NSString* MESSAGE_KEY = @"message";
     
     [self registerAppforDetectLockState];
     [self configureAudioPlayer];
+    [self configureVoipAudioPlayer];
+    [self configureExitAudioPlayer];
+    [self configureIgnoreListAudioPlayer];
     [self configureAudioSession];
+    shouldExitApp = NO;
         
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
     [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
@@ -77,6 +81,27 @@ static NSString* MESSAGE_KEY = @"message";
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void) exitApp: (CDVInvokedUrlCommand*)command
+{
+    shouldExitApp = YES;
+    [exitAudioPlayer play];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 25 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        if (shouldExitApp && ![self isAppInForeground]) {
+            exit(0);
+        } else {
+            [exitAudioPlayer stop];
+        }
+    });
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) cancelExitApp: (CDVInvokedUrlCommand*)command
+{
+    shouldExitApp = NO;
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
 
 - (void) addToIgnoreList: (CDVInvokedUrlCommand*)command
 {
@@ -84,7 +109,20 @@ static NSString* MESSAGE_KEY = @"message";
     if (![[command.arguments objectAtIndex:0] isEqual: [NSNull null]])
     {
         BOOL success = [[DBManager getSharedInstance] addMessage:[command.arguments objectAtIndex:0]];
-        if (success) pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:success];
+        if (success) {
+            if (![self isAppInForeground]) {
+                shouldExitApp = YES;
+                [ignoreListAudioPlayer play];
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 25 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                    if (shouldExitApp && ![self isAppInForeground]) {
+                        exit(0);
+                    } else {
+                        [ignoreListAudioPlayer stop];
+                    }
+                });
+            }
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:success];
+        }
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -182,14 +220,14 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    [audioPlayer play];
+    [voipAudioPlayer play];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 55 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        [audioPlayer stop];
+        [voipAudioPlayer stop];
     });
     
     if ([self getSuppressProcessing]) {
-        [audioPlayer stop];
+        [voipAudioPlayer stop];
         return;
     };
     
@@ -227,10 +265,13 @@ static NSString* MESSAGE_KEY = @"message";
         messageTimestampStr = [NSString stringWithFormat:@"%ld", messageTimestamp];
         if ([[DBManager getSharedInstance] exists: messageTimestampStr])
         {
-            [audioPlayer stop];
+            [voipAudioPlayer stop];
             return;
         }
     }
+    
+    // Cancel exiting the app since we've got a new urgent
+    shouldExitApp = NO;
     
     for (NSString *apsKey in payloadDict)
     {
@@ -290,6 +331,16 @@ static NSString* MESSAGE_KEY = @"message";
     return isOpen;
 }
 
+- (BOOL) isAppInForeground
+{
+    if([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
+    {
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
 - (void) appBackgrounded
 {
     appBroughtToFront = NO;
@@ -328,6 +379,39 @@ static NSString* MESSAGE_KEY = @"message";
     NSURL* url = [NSURL fileURLWithPath:path];
     audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
     audioPlayer.volume = 0;
+};
+
+/**
+ * Configure the VOIP audio player.
+ */
+- (void) configureVoipAudioPlayer
+{
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
+    NSURL* url = [NSURL fileURLWithPath:path];
+    voipAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
+    voipAudioPlayer.volume = 0.5;
+};
+
+/**
+ * Configure the exit audio player.
+ */
+- (void) configureExitAudioPlayer
+{
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
+    NSURL* url = [NSURL fileURLWithPath:path];
+    exitAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
+    exitAudioPlayer.volume = 0.5;
+};
+
+/**
+ * Configure the add to ignore list audio player.
+ */
+- (void) configureIgnoreListAudioPlayer
+{
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
+    NSURL* url = [NSURL fileURLWithPath:path];
+    ignoreListAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
+    ignoreListAudioPlayer.volume = 0.5;
 };
 
 /**
