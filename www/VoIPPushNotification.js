@@ -167,6 +167,14 @@ module.exports = {
     playSilentAudio: function (successCallback, errorCallback, duration, volumeOverride) {
         cordova.exec(successCallback, errorCallback, 'VoIPPushNotification', 'playSilentAudio', [duration, volumeOverride]);        
     },
+    
+    exitApp: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, 'VoIPPushNotification', 'exitApp');
+    },
+               
+    cancelExitApp: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, 'VoIPPushNotification', 'cancelExitApp');
+    },
 
     /**
      * VoIPPushNotification Object.
