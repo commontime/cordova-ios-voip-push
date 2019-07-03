@@ -389,7 +389,7 @@ static NSString* MESSAGE_KEY = @"message";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     voipAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    voipAudioPlayer.volume = 0.5;
+    voipAudioPlayer.volume = 0;
 };
 
 /**
@@ -400,7 +400,7 @@ static NSString* MESSAGE_KEY = @"message";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     exitAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    exitAudioPlayer.volume = 0.5;
+    exitAudioPlayer.volume = 0;
 };
 
 /**
@@ -411,7 +411,7 @@ static NSString* MESSAGE_KEY = @"message";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     ignoreListAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    ignoreListAudioPlayer.volume = 0.5;
+    ignoreListAudioPlayer.volume = 0;
 };
 
 /**
