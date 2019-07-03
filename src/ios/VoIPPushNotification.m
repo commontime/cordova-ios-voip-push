@@ -50,7 +50,6 @@ static NSString* MESSAGE_KEY = @"message";
     [self configureExitAudioPlayer];
     [self configureIgnoreListAudioPlayer];
     [self configureAudioSession];
-    shouldExitApp = NO;
         
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
     [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
@@ -81,24 +80,29 @@ static NSString* MESSAGE_KEY = @"message";
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void) doExit
+{
+    if (![self isAppInForeground]) {
+        exit(0);
+    } else {
+        [exitAudioPlayer stop];
+    }
+}
+
 - (void) exitApp: (CDVInvokedUrlCommand*)command
 {
-    shouldExitApp = YES;
     [exitAudioPlayer play];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 25 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        if (shouldExitApp && ![self isAppInForeground]) {
-            exit(0);
-        } else {
-            [exitAudioPlayer stop];
-        }
-    });
+    [exitTimer invalidate];
+    exitTimer = nil;
+    exitTimer = [NSTimer scheduledTimerWithTimeInterval:25 target:self selector:@selector(doExit) userInfo:nil repeats:NO];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void) cancelExitApp: (CDVInvokedUrlCommand*)command
 {
-    shouldExitApp = NO;
+    [exitTimer invalidate];
+    exitTimer = nil;
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -111,15 +115,10 @@ static NSString* MESSAGE_KEY = @"message";
         BOOL success = [[DBManager getSharedInstance] addMessage:[command.arguments objectAtIndex:0]];
         if (success) {
             if (![self isAppInForeground]) {
-                shouldExitApp = YES;
                 [ignoreListAudioPlayer play];
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 25 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                    if (shouldExitApp && ![self isAppInForeground]) {
-                        exit(0);
-                    } else {
-                        [ignoreListAudioPlayer stop];
-                    }
-                });
+                [exitTimer invalidate];
+                exitTimer = nil;
+                exitTimer = [NSTimer scheduledTimerWithTimeInterval:25 target:self selector:@selector(doExit) userInfo:nil repeats:NO];
             }
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:success];
         }
@@ -271,7 +270,8 @@ static NSString* MESSAGE_KEY = @"message";
     }
     
     // Cancel exiting the app since we've got a new urgent
-    shouldExitApp = NO;
+    [exitTimer invalidate];
+    exitTimer = nil;
     
     for (NSString *apsKey in payloadDict)
     {
