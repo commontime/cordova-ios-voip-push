@@ -1,6 +1,6 @@
 {
   "name": "cordova-ios-voip-push",
-  "version": "1.9.1",
+  "version": "1.9.1-tvfs",
   "description": "Register and receive VoIP push notifications in hybrid app projects with Cordova",
   "repository": {
     "type": "git",
