@@ -19,6 +19,8 @@
     PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     pushRegistry.delegate = self;
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+
+    [self configureExitAudioPlayer];
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
@@ -71,6 +73,35 @@
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
     }
+}
+
+/**
+ * Configure the exit audio player.
+ */
+- (void) configureExitAudioPlayer
+{
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
+    NSURL* url = [NSURL fileURLWithPath:path];
+    exitAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
+    exitAudioPlayer.volume = 1; // TODO: Set this to 0
+};
+
+- (void) exitApp: (CDVInvokedUrlCommand*)command
+{
+    [exitAudioPlayer play];
+    [exitTimer invalidate];
+    exitTimer = nil;
+    exitTimer = [NSTimer scheduledTimerWithTimeInterval:25 target:self selector:@selector(doExit) userInfo:nil repeats:NO];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void) cancelExitApp: (CDVInvokedUrlCommand*)command
+{
+    [exitTimer invalidate];
+    exitTimer = nil;
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 @end

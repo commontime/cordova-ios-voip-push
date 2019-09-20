@@ -128,6 +128,14 @@ module.exports = {
         return new VoIPPushNotification(options);
     },
 
+    exitApp: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, 'VoIPPushNotification', 'exitApp');
+    },
+               
+    cancelExitApp: function (successCallback, errorCallback) {
+        cordova.exec(successCallback, errorCallback, 'VoIPPushNotification', 'cancelExitApp');
+    },
+
     /**
      * VoIPPushNotification Object.
      *
