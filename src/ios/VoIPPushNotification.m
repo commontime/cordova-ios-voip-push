@@ -104,4 +104,25 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (BOOL) isAppInForeground
+{
+    if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive)
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+}
+
+- (void) doExit
+{
+    if (![self isAppInForeground]) {
+        exit(0);
+    } else {
+        [exitAudioPlayer stop];
+    }
+}
+
 @end
