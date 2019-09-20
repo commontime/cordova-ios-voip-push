@@ -100,6 +100,7 @@
 {
     [exitTimer invalidate];
     exitTimer = nil;
+    [exitAudioPlayer stop];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:YES];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
