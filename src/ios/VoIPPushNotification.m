@@ -411,7 +411,7 @@ static NSString* MESSAGE_KEY = @"message";
  */
 - (void) configureAudioPlayer
 {
-    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
     audioPlayer.volume = 0;
@@ -422,7 +422,7 @@ static NSString* MESSAGE_KEY = @"message";
  */
 - (void) configureVoipAudioPlayer
 {
-    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     voipAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
     voipAudioPlayer.volume = 0;
@@ -433,7 +433,7 @@ static NSString* MESSAGE_KEY = @"message";
  */
 - (void) configureExitAudioPlayer
 {
-    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     exitAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
     exitAudioPlayer.volume = 0;
@@ -444,7 +444,7 @@ static NSString* MESSAGE_KEY = @"message";
  */
 - (void) configureIgnoreListAudioPlayer
 {
-    NSString* path = [[NSBundle mainBundle] pathForResource:@"appbeep" ofType:@"m4a"];
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     ignoreListAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
     ignoreListAudioPlayer.volume = 0;
