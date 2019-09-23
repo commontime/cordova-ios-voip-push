@@ -83,7 +83,7 @@
     NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     exitAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    exitAudioPlayer.volume = 1; // TODO: Set this to 0
+    exitAudioPlayer.volume = 0;
 };
 
 - (void) exitApp: (CDVInvokedUrlCommand*)command
