@@ -229,10 +229,10 @@ static NSString* MESSAGE_KEY = @"message";
         [voipAudioPlayer stop];
     });
     
-    // if ([self getSuppressProcessing]) {
-    //     [voipAudioPlayer stop];
-    //     return;
-    // };
+    if ([self getSuppressProcessing]) {
+        [voipAudioPlayer stop];
+        return;
+    };
     
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
@@ -414,7 +414,7 @@ static NSString* MESSAGE_KEY = @"message";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    audioPlayer.volume = 0;
+    audioPlayer.volume = 1;
 };
 
 /**
@@ -436,7 +436,7 @@ static NSString* MESSAGE_KEY = @"message";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     exitAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    exitAudioPlayer.volume = 0;
+    exitAudioPlayer.volume = 1;
 };
 
 /**
@@ -447,7 +447,7 @@ static NSString* MESSAGE_KEY = @"message";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     ignoreListAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    ignoreListAudioPlayer.volume = 0;
+    ignoreListAudioPlayer.volume = 1;
 };
 
 /**
