@@ -34,8 +34,6 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)init:(CDVInvokedUrlCommand*)command
 {
-
-    initTimestamp = [[NSDate date] timeIntervalSince1970] * 1000;
     
     if (callbackIds == nil) {
         callbackIds = [[NSMutableArray alloc] init];
@@ -51,6 +49,7 @@ static NSString* MESSAGE_KEY = @"message";
     
     [self registerAppforDetectLockState];
     if (!audioInitialised) {
+        initTimestamp = [[NSDate date] timeIntervalSince1970] * 1000;
         [self configureAudioPlayer];
         [self configureVoipAudioPlayer];
         [self configureExitAudioPlayer];
