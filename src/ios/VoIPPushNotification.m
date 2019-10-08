@@ -50,11 +50,14 @@ static NSString* MESSAGE_KEY = @"message";
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
     [self registerAppforDetectLockState];
-    [self configureAudioPlayer];
-    [self configureVoipAudioPlayer];
-    [self configureExitAudioPlayer];
-    [self configureIgnoreListAudioPlayer];
-    [self configureAudioSession];
+    if (!audioInitialised) {
+        [self configureAudioPlayer];
+        [self configureVoipAudioPlayer];
+        [self configureExitAudioPlayer];
+        [self configureIgnoreListAudioPlayer];
+        [self configureAudioSession];
+        audioInitialised = true;
+    }
         
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
     [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
@@ -232,10 +235,14 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    if (!voipAudioPlayer.isPlaying) [voipAudioPlayer play];    
+    if (!voipAudioPlayer.isPlaying) {
+        [voipAudioPlayer play]; 
+    } else {
+        NSLog(@"[LEON] Already playing voipAudioPlayer!!");
+    }
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 120 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        NSLog(@"[LEON] 120 seconds up, stopping voip audio");
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 55 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        NSLog(@"[LEON] 55 seconds up, stopping voip audio");
         [voipAudioPlayer stop];
     });
     
