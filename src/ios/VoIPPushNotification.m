@@ -41,11 +41,7 @@ static NSString* MESSAGE_KEY = @"message";
         [self configureVoipAudioPlayer];
         [self configureExitAudioPlayer];
         [self configureIgnoreListAudioPlayer];
-        [self configureAudioSession];
-        //http://stackoverflow.com/questions/27245808/implement-pushkit-and-test-in-development-behavior/28562124#28562124
-        PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
-        pushRegistry.delegate = self;
-        pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+        [self configureAudioSession];        
         NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
         [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
         UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];[center requestAuthorizationWithOptions: (UNAuthorizationOptionAlert + UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
@@ -61,6 +57,11 @@ static NSString* MESSAGE_KEY = @"message";
     [callbackIds addObject:command.callbackId];
     
     NSLog(@"[objC] callbackId: %@", command.callbackId);
+
+    //http://stackoverflow.com/questions/27245808/implement-pushkit-and-test-in-development-behavior/28562124#28562124
+    PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
+    pushRegistry.delegate = self;
+    pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
 }
 
