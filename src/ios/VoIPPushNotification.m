@@ -98,6 +98,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void) exitApp: (CDVInvokedUrlCommand*)command
 {
+    NSLog(@"[LEON] Exit app called...");
     [exitAudioPlayer play];
     [exitTimer invalidate];
     exitTimer = nil;
@@ -233,10 +234,12 @@ static NSString* MESSAGE_KEY = @"message";
     [voipAudioPlayer play];
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 120 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        NSLog(@"[LEON] 120 seconds up, stopping voip audio");
         [voipAudioPlayer stop];
     });
     
     if ([self getSuppressProcessing]) {
+        NSLog(@"[LEON] getSuppressProcessing false, stopping voip audio");
         [voipAudioPlayer stop];
         return;
     };
@@ -274,6 +277,7 @@ static NSString* MESSAGE_KEY = @"message";
         if ([[DBManager getSharedInstance] exists: messageTimestampStr])
         {
             if (initTimestamp > messageTimestamp) {
+                NSLog(@"[LEON] initTimestamp > messageTimestamp, stopping voip audio");
                 [voipAudioPlayer stop];
                 return;
             }
