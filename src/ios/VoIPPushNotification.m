@@ -232,8 +232,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    // if (!voipAudioPlayer.isPlaying) 
-    [voipAudioPlayer play];
+    if (!voipAudioPlayer.isPlaying) [voipAudioPlayer play];    
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 120 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         NSLog(@"[LEON] 120 seconds up, stopping voip audio");
