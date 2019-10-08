@@ -86,9 +86,12 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void) doExit
 {
+    NSLog(@"[LEON] In do exit");
     if (![self isAppInForeground]) {
+        NSLog(@"[LEON] EDIT!");
         exit(0);
     } else {
+        NSLog(@"[LEON] Stopping audio");
         [exitAudioPlayer stop];
     }
 }
@@ -113,12 +116,16 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void) addToIgnoreList: (CDVInvokedUrlCommand*)command
 {
+    NSLog(@"[LEON] Adding to ignore list...");
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Failed to add message"];
     if (![[command.arguments objectAtIndex:0] isEqual: [NSNull null]])
     {
+        NSLog(@"[LEON] Adding to DB...");
         BOOL success = [[DBManager getSharedInstance] addMessage:[command.arguments objectAtIndex:0]];
         if (success) {
+            NSLog(@"[LEON] DB add successful");
             if (![self isAppInForeground]) {
+                NSLog(@"[LEON] Not in the foreground, playing silent audio...");
                 [ignoreListAudioPlayer play];
                 [exitTimer invalidate];
                 exitTimer = nil;
