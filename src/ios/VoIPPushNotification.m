@@ -316,13 +316,13 @@ static NSString* MESSAGE_KEY = @"message";
                         //     }
                         // }];                        
                         
-                        UILocalNotification *notification = [[UILocalNotification alloc] init];
-                        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-                        notification.alertBody = @"You have a new urgent notification";
-                        notification.timeZone = [NSTimeZone defaultTimeZone];
-                        NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
-                        notification.userInfo = userInfoDict;
-                        [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+                        // UILocalNotification *notification = [[UILocalNotification alloc] init];
+                        // notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
+                        // notification.alertBody = @"You have a new urgent notification";
+                        // notification.timeZone = [NSTimeZone defaultTimeZone];
+                        // NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
+                        // notification.userInfo = userInfoDict;
+                        // [[UIApplication sharedApplication] scheduleLocalNotification:notification];
                     }
                 }];
             }
