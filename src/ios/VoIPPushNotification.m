@@ -123,15 +123,15 @@ static NSString* MESSAGE_KEY = @"message";
         NSLog(@"[LEON] Adding to DB...");
         BOOL success = [[DBManager getSharedInstance] addMessage:[command.arguments objectAtIndex:0]];
         if (success) {
-            NSLog(@"[LEON] DB add successful");
-            if (![self isAppInForeground]) {
-                NSLog(@"[LEON] Not in the foreground, playing silent audio...");
-                [ignoreListAudioPlayer play];
-                [exitTimer invalidate];
-                exitTimer = nil;
-                exitTimer = [NSTimer scheduledTimerWithTimeInterval:25 target:self selector:@selector(doExit) userInfo:nil repeats:NO];
-            }
+            NSLog(@"[LEON] DB add successful");            
             pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:success];
+        }
+        if (![self isAppInForeground]) {
+            NSLog(@"[LEON] Not in the foreground, playing silent audio...");
+            [ignoreListAudioPlayer play];
+            [exitTimer invalidate];
+            exitTimer = nil;
+            exitTimer = [NSTimer scheduledTimerWithTimeInterval:25 target:self selector:@selector(doExit) userInfo:nil repeats:NO];
         }
     }
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
