@@ -225,7 +225,7 @@ static NSString* MESSAGE_KEY = @"message";
 {
     [voipAudioPlayer play];
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 55 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 120 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         [voipAudioPlayer stop];
     });
     
@@ -425,7 +425,7 @@ static NSString* MESSAGE_KEY = @"message";
     NSString* path = [[NSBundle mainBundle] pathForResource:@"keepalive" ofType:@"m4a"];
     NSURL* url = [NSURL fileURLWithPath:path];
     voipAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
-    voipAudioPlayer.volume = 0;
+    voipAudioPlayer.volume = 1;
 };
 
 /**
