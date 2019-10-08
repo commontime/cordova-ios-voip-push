@@ -229,10 +229,10 @@ static NSString* MESSAGE_KEY = @"message";
         [voipAudioPlayer stop];
     });
     
-    if ([self getSuppressProcessing]) {
-        [voipAudioPlayer stop];
-        return;
-    };
+    // if ([self getSuppressProcessing]) {
+    //     [voipAudioPlayer stop];
+    //     return;
+    // };
     
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
