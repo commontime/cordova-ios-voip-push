@@ -57,6 +57,8 @@ static NSString* MESSAGE_KEY = @"message";
         [self configureIgnoreListAudioPlayer];
         [self configureAudioSession];
         audioInitialised = true;
+    } else {
+        NSLog(@"[LEON] Audio already initialised.");
     }
         
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
@@ -306,29 +308,29 @@ static NSString* MESSAGE_KEY = @"message";
                 {
                     if (!foregrounded)
                     {
-                        // UNUserNotificationCenter *ns = UNUserNotificationCenter.currentNotificationCenter;
-                        // [ns getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
-                        //     for (int i=0; i<[notifications count]; i++)
-                        //     {
-                        //         UNNotification* notification = [notifications objectAtIndex:i];
-                        //         UNNotificationRequest *request = notification.request;
-                        //         NSDictionary *userInfoCurrent = request.content.userInfo;
-                        //         NSString *timestamp = [NSString stringWithFormat:@"%@", [userInfoCurrent valueForKey:@"timestamp"]];
-                        //         if ([timestamp isEqualToString:messageTimestampStr])
-                        //         {
-                        //             [ns removeDeliveredNotificationsWithIdentifiers:@[request.identifier]];
-                        //             break;
-                        //         }
-                        //     }
-                        // }];                        
+                        UNUserNotificationCenter *ns = UNUserNotificationCenter.currentNotificationCenter;
+                        [ns getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
+                            for (int i=0; i<[notifications count]; i++)
+                            {
+                                UNNotification* notification = [notifications objectAtIndex:i];
+                                UNNotificationRequest *request = notification.request;
+                                NSDictionary *userInfoCurrent = request.content.userInfo;
+                                NSString *timestamp = [NSString stringWithFormat:@"%@", [userInfoCurrent valueForKey:@"timestamp"]];
+                                if ([timestamp isEqualToString:messageTimestampStr])
+                                {
+                                    [ns removeDeliveredNotificationsWithIdentifiers:@[request.identifier]];
+                                    break;
+                                }
+                            }
+                        }];                        
                         
-                        // UILocalNotification *notification = [[UILocalNotification alloc] init];
-                        // notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-                        // notification.alertBody = @"You have a new urgent notification";
-                        // notification.timeZone = [NSTimeZone defaultTimeZone];
-                        // NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
-                        // notification.userInfo = userInfoDict;
-                        // [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+                        UILocalNotification *notification = [[UILocalNotification alloc] init];
+                        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
+                        notification.alertBody = @"You have a new urgent notification";
+                        notification.timeZone = [NSTimeZone defaultTimeZone];
+                        NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
+                        notification.userInfo = userInfoDict;
+                        [[UIApplication sharedApplication] scheduleLocalNotification:notification];
                     }
                 }];
             }
