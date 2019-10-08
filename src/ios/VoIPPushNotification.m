@@ -35,11 +35,6 @@ static NSString* MESSAGE_KEY = @"message";
 - (void)init:(CDVInvokedUrlCommand*)command
 {
 
-    if (initTimestamp > 0) {
-        NSLog(@"[LEON] initTimestamp already exists!");
-        return;
-    }
-
     initTimestamp = [[NSDate date] timeIntervalSince1970] * 1000;
     
     if (callbackIds == nil) {
@@ -54,12 +49,16 @@ static NSString* MESSAGE_KEY = @"message";
     pushRegistry.delegate = self;
     pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
-    [self registerAppforDetectLockState];
-    [self configureAudioPlayer];
-    [self configureVoipAudioPlayer];
-    [self configureExitAudioPlayer];
-    [self configureIgnoreListAudioPlayer];
-    [self configureAudioSession];
+    if (!audioInitialised) {
+        NSLog(@"[LEON] Audio already initialised");
+        [self registerAppforDetectLockState];
+        [self configureAudioPlayer];
+        [self configureVoipAudioPlayer];
+        [self configureExitAudioPlayer];
+        [self configureIgnoreListAudioPlayer];
+        [self configureAudioSession];
+        audioInitialised = true;
+    }
         
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
     [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
