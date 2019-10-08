@@ -10,6 +10,7 @@
     AVAudioPlayer* exitAudioPlayer;
     AVAudioPlayer* ignoreListAudioPlayer;
     NSTimer* exitTimer;
+    BOOL audioInitialised;
 }
 
 - (void) init:(CDVInvokedUrlCommand*)command;

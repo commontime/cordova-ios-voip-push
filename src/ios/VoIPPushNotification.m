@@ -27,21 +27,26 @@ static NSString* MESSAGE_KEY = @"message";
 
 + (void)load
 {
-    NSLog(@"[LEON] Load called.");
-    initTimestamp = [[NSDate date] timeIntervalSince1970] * 1000;
     [self swizzleWKWebViewEngine];
-    [self registerAppforDetectLockState];
-    [self configureAudioPlayer];
-    [self configureVoipAudioPlayer];
-    [self configureExitAudioPlayer];
-    [self configureIgnoreListAudioPlayer];
-    [self configureAudioSession];    
 }
 
 #pragma mark JS Functions
 
 - (void)init:(CDVInvokedUrlCommand*)command
-{    
+{
+    if (!audioInitialised) {
+        initTimestamp = [[NSDate date] timeIntervalSince1970] * 1000;
+        [self registerAppforDetectLockState];
+        [self configureAudioPlayer];
+        [self configureVoipAudioPlayer];
+        [self configureExitAudioPlayer];
+        [self configureIgnoreListAudioPlayer];
+        [self configureAudioSession];
+        audioInitialised = true;
+    } else {
+        NSLog(@"[LEON] Audio already initialised.");
+    }
+    
     if (callbackIds == nil) {
         callbackIds = [[NSMutableArray alloc] init];
     }
@@ -52,7 +57,9 @@ static NSString* MESSAGE_KEY = @"message";
     //http://stackoverflow.com/questions/27245808/implement-pushkit-and-test-in-development-behavior/28562124#28562124
     PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     pushRegistry.delegate = self;
-    pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];        
+    pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+    
+    
         
     NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
     [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
