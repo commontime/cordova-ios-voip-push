@@ -34,6 +34,12 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)init:(CDVInvokedUrlCommand*)command
 {
+
+    if (initTimestamp) {
+        NSLog(@"[LEON] initTimestamp already exists!");
+        return;
+    }
+
     initTimestamp = [[NSDate date] timeIntervalSince1970] * 1000;
     
     if (callbackIds == nil) {
