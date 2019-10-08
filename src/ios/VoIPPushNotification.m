@@ -301,35 +301,36 @@ static NSString* MESSAGE_KEY = @"message";
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
-                // [self foregroundApp: ^(bool foregrounded)
-                // {
-                if (![self isAppInForeground])
+                [self foregroundApp: ^(bool foregrounded)
                 {
-                    UNUserNotificationCenter *ns = UNUserNotificationCenter.currentNotificationCenter;
-                    [ns getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
-                        for (int i=0; i<[notifications count]; i++)
-                        {
-                            UNNotification* notification = [notifications objectAtIndex:i];
-                            UNNotificationRequest *request = notification.request;
-                            NSDictionary *userInfoCurrent = request.content.userInfo;
-                            NSString *timestamp = [NSString stringWithFormat:@"%@", [userInfoCurrent valueForKey:@"timestamp"]];
-                            if ([timestamp isEqualToString:messageTimestampStr])
+                    // if (![self isAppInForeground])
+                    if (!foregrounded)
+                    {
+                        UNUserNotificationCenter *ns = UNUserNotificationCenter.currentNotificationCenter;
+                        [ns getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
+                            for (int i=0; i<[notifications count]; i++)
                             {
-                                [ns removeDeliveredNotificationsWithIdentifiers:@[request.identifier]];
-                                break;
+                                UNNotification* notification = [notifications objectAtIndex:i];
+                                UNNotificationRequest *request = notification.request;
+                                NSDictionary *userInfoCurrent = request.content.userInfo;
+                                NSString *timestamp = [NSString stringWithFormat:@"%@", [userInfoCurrent valueForKey:@"timestamp"]];
+                                if ([timestamp isEqualToString:messageTimestampStr])
+                                {
+                                    [ns removeDeliveredNotificationsWithIdentifiers:@[request.identifier]];
+                                    break;
+                                }
                             }
-                        }
-                    }];                        
-                    
-                    UILocalNotification *notification = [[UILocalNotification alloc] init];
-                    notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-                    notification.alertBody = @"You have a new urgent notification";
-                    notification.timeZone = [NSTimeZone defaultTimeZone];
-                    NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
-                    notification.userInfo = userInfoDict;
-                    [[UIApplication sharedApplication] scheduleLocalNotification:notification];
-                }
-                // }];
+                        }];                        
+                        
+                        UILocalNotification *notification = [[UILocalNotification alloc] init];
+                        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
+                        notification.alertBody = @"You have a new urgent notification";
+                        notification.timeZone = [NSTimeZone defaultTimeZone];
+                        NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
+                        notification.userInfo = userInfoDict;
+                        [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+                    }
+                }];
             }
         }
         
@@ -365,7 +366,7 @@ static NSString* MESSAGE_KEY = @"message";
     PrivateApi_LSApplicationWorkspace* workspace = [NSClassFromString(@"LSApplicationWorkspace") new];
     NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
     [workspace openApplicationWithBundleID:bundleId];
-    NSTimer *timer = [NSTimer timerWithTimeInterval:1.0 repeats:NO block:^(NSTimer * _Nonnull timer) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         bool isOpen = [self isAppInForeground];
         if (!isOpen) {
             // Reason for failing to open up the app is almost certainly because the phone is locked.
@@ -378,8 +379,7 @@ static NSString* MESSAGE_KEY = @"message";
             _foregroundAppCompletionHandler(isOpen);
             _foregroundAppCompletionHandler = nil;
         }
-    }];
-    [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+    });
 }
 
 - (BOOL) isAppInForeground
