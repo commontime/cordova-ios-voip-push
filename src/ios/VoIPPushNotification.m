@@ -65,6 +65,14 @@ static NSString* MESSAGE_KEY = @"message";
     
 }
 
+- (void)debounce:(SEL)action delay:(NSTimeInterval)delay
+{
+  NSLog(@"[LEON] debounce");
+  __weak typeof(self) weakSelf = self;
+  [NSObject cancelPreviousPerformRequestsWithTarget:weakSelf selector:action object:nil];
+  [weakSelf performSelector:action withObject:nil afterDelay:delay];
+}
+
 - (void) didInitialiseApp: (CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:appBroughtToFront];
@@ -232,6 +240,41 @@ static NSString* MESSAGE_KEY = @"message";
     }
 }
 
+
+- (void)showLocalNotificationAndBringToFront
+{
+    NSLog(@"[LEON] showLocalNotificationAndBringToFront");
+    [self foregroundApp: ^(bool foregrounded) {
+        if (!foregrounded)
+        {
+            NSLog(@"[LEON] !foregrounded");
+            UNUserNotificationCenter *ns = UNUserNotificationCenter.currentNotificationCenter;
+            [ns getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
+                for (int i=0; i<[notifications count]; i++)
+                {
+                    UNNotification* notification = [notifications objectAtIndex:i];
+                    UNNotificationRequest *request = notification.request;
+                    NSDictionary *userInfoCurrent = request.content.userInfo;
+                    NSString *timestamp = [NSString stringWithFormat:@"%@", [userInfoCurrent valueForKey:@"timestamp"]];
+                    if ([timestamp isEqualToString:messageTimestampStr])
+                    {
+                        [ns removeDeliveredNotificationsWithIdentifiers:@[request.identifier]];
+                        break;
+                    }
+                }
+            }];                        
+            
+            UILocalNotification *notification = [[UILocalNotification alloc] init];
+            notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
+            notification.alertBody = @"You have a new urgent notification";
+            notification.timeZone = [NSTimeZone defaultTimeZone];
+            NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
+            notification.userInfo = userInfoDict;
+            [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+        }
+    }];
+}
+
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
     if (!voipAudioPlayer.isPlaying) {
@@ -301,35 +344,8 @@ static NSString* MESSAGE_KEY = @"message";
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
-                [self foregroundApp: ^(bool foregrounded)
-                {
-                    if (!foregrounded)
-                    {
-                        UNUserNotificationCenter *ns = UNUserNotificationCenter.currentNotificationCenter;
-                        [ns getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
-                            for (int i=0; i<[notifications count]; i++)
-                            {
-                                UNNotification* notification = [notifications objectAtIndex:i];
-                                UNNotificationRequest *request = notification.request;
-                                NSDictionary *userInfoCurrent = request.content.userInfo;
-                                NSString *timestamp = [NSString stringWithFormat:@"%@", [userInfoCurrent valueForKey:@"timestamp"]];
-                                if ([timestamp isEqualToString:messageTimestampStr])
-                                {
-                                    [ns removeDeliveredNotificationsWithIdentifiers:@[request.identifier]];
-                                    break;
-                                }
-                            }
-                        }];                        
-                        
-                        UILocalNotification *notification = [[UILocalNotification alloc] init];
-                        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-                        notification.alertBody = @"You have a new urgent notification";
-                        notification.timeZone = [NSTimeZone defaultTimeZone];
-                        NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
-                        notification.userInfo = userInfoDict;
-                        [[UIApplication sharedApplication] scheduleLocalNotification:notification];
-                    }
-                }];
+                SEL method @selector(showLocalNotificationAndBringToFront);
+                [self debounce:method delay:5];
             }
         }
         
@@ -364,7 +380,7 @@ static NSString* MESSAGE_KEY = @"message";
     foregroundAfterUnlock = NO;
     PrivateApi_LSApplicationWorkspace* workspace = [NSClassFromString(@"LSApplicationWorkspace") new];
     NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
-    // [workspace openApplicationWithBundleID:bundleId];
+    [workspace openApplicationWithBundleID:bundleId];
     NSTimer *timer = [NSTimer timerWithTimeInterval:1.0 repeats:NO block:^(NSTimer * _Nonnull timer) {
         bool isOpen = [self isAppInForeground];
         if (!isOpen) {
