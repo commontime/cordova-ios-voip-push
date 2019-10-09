@@ -67,7 +67,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)debounce:(SEL)sel delay:(NSTimeInterval)delay withString:(NSString *)withString
 {
-  NSLog(@"[LEON] debounce");
+  NSLog(@"[LEON] debounce %@", withString);
   [NSObject cancelPreviousPerformRequestsWithTarget:self selector:sel object:nil];
   [self performSelector:sel withObject:@"withString" afterDelay:delay];
 }
@@ -241,7 +241,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 
 - (void)showLocalNotificationAndBringToFront:(NSString *)messageTimestampStr{
-    NSLog(@"[LEON] showLocalNotificationAndBringToFront");
+    NSLog(@"[LEON] showLocalNotificationAndBringToFront: %@", messageTimestampStr);
     [self foregroundApp: ^(bool foregrounded) {
         if (!foregrounded)
         {
