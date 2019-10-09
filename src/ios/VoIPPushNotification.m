@@ -46,7 +46,6 @@ static NSString* MESSAGE_KEY = @"message";
         [self configureVoipAudioPlayer];
         [self configureExitAudioPlayer];
         [self configureIgnoreListAudioPlayer];
-        [self configureAudioSession];        
         NSNotificationCenter* listener = [NSNotificationCenter defaultCenter];
         [listener addObserver:self selector:@selector(appBackgrounded) name:UIApplicationDidEnterBackgroundNotification object:nil];
         UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];[center requestAuthorizationWithOptions: (UNAuthorizationOptionAlert + UNAuthorizationOptionSound) completionHandler:^(BOOL granted, NSError * _Nullable error) {
