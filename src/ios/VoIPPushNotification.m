@@ -291,7 +291,7 @@ static NSString* MESSAGE_KEY = @"message";
     
     NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
     
-    long messageTimestamp = [self getPushTimestamp:payloadDict]];
+    long messageTimestamp = [self getPushTimestamp:payloadDict];
     
     NSString *messageTimestampStr;
     
