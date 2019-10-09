@@ -71,7 +71,7 @@ static NSString* MESSAGE_KEY = @"message";
 - (void)debounce:(SEL)sel delay:(NSTimeInterval)delay withPayload:(PKPushPayload *)withPayload
 {
   NSLog(@"[LEON] debounce");
-  [NSObject cancelPreviousPerformRequestsWithTarget:self selector:sel object:nil];
+  [NSObject cancelPreviousPerformRequestsWithTarget:self selector:sel object:withPayload];
   [self performSelector:sel withObject:withPayload afterDelay:delay];
 }
 
