@@ -27,6 +27,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 + (void)load
 {
+    NSLog(@"[LEON] Load called.");
     [self swizzleWKWebViewEngine];
     AVAudioSession* session = [AVAudioSession sharedInstance];
     [session setActive:NO error:NULL];
@@ -363,6 +364,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
+    NSLog(@"[LEON] Push received");
     [self debounce:@selector(onVoipPush:) delay:5 withPayload:payload];
 }
 
