@@ -365,7 +365,11 @@ static NSString* MESSAGE_KEY = @"message";
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
     NSLog(@"[LEON] Push received");
-    [self debounce:@selector(onVoipPush:) delay:5 withPayload:payload];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        NSLog(@"[LEON] delayed onVoipPush for 5 seconds");
+        [self onVoipPush:payload];
+    });
+    // [self debounce:@selector(onVoipPush:) delay:5 withPayload:payload];
 }
 
 - (BOOL) containsKey: (NSDictionary*) dict: (NSString*) key
