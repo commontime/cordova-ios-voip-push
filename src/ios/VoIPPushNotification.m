@@ -343,8 +343,7 @@ static NSString* MESSAGE_KEY = @"message";
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
-                SEL method @selector(showLocalNotificationAndBringToFront);
-                [self debounce:method delay:5];
+                [self debounce:@selector(showLocalNotificationAndBringToFront) delay:5];
             }
         }
         
