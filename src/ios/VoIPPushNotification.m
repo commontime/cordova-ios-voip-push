@@ -381,6 +381,9 @@ static NSString* MESSAGE_KEY = @"message";
     if (ts == lastPushTimestamp) return;
     lastPushTimestamp = ts;
     [self onVoipPush:payload];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        lastPushTimestamp = -1;
+    });
 
     // int randomNumber = [self getRandomNumberBetween:1 and:5];
     // dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
