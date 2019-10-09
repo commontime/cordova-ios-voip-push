@@ -72,9 +72,8 @@ static NSString* MESSAGE_KEY = @"message";
 - (void)debounce:(SEL)action delay:(NSTimeInterval)delay withPayload:(PKPushPayload *)payload
 {
   NSLog(@"[LEON] debounce");
-  __weak typeof(self) *weakSelf = self;
-  [NSObject cancelPreviousPerformRequestsWithTarget:weakSelf selector:action object:nil];
-  [weakSelf performSelector:action withObject:payload afterDelay:delay];
+  [NSObject cancelPreviousPerformRequestsWithTarget:self];
+  [self performSelector:action withObject:payload afterDelay:delay];
 }
 
 - (void) didInitialiseApp: (CDVInvokedUrlCommand*)command
