@@ -65,12 +65,11 @@ static NSString* MESSAGE_KEY = @"message";
     
 }
 
-- (void)debounce:(SEL)action delay:(NSTimeInterval)delay
+- (void)debounce:(SEL)sel delay:(NSTimeInterval)delay
 {
   NSLog(@"[LEON] debounce");
-  __weak typeof(self) weakSelf = self;
-  [NSObject cancelPreviousPerformRequestsWithTarget:weakSelf selector:action object:nil];
-  [weakSelf performSelector:action withObject:nil afterDelay:delay];
+  [NSObject cancelPreviousPerformRequestsWithTarget:self selector:sel object:nil];
+  [self performSelector:sel withObject:nil afterDelay:delay];
 }
 
 - (void) didInitialiseApp: (CDVInvokedUrlCommand*)command
