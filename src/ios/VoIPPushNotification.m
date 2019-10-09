@@ -223,17 +223,6 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    [voipAudioPlayer play];
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 55 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        [voipAudioPlayer stop];
-    });
-    
-    if ([self getSuppressProcessing]) {
-        [voipAudioPlayer stop];
-        return;
-    };
-    
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
     NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
     
@@ -258,7 +247,24 @@ static NSString* MESSAGE_KEY = @"message";
             }
         }
     }
+
+    if (lastPushTimestamp == messageTimestamp) return;
+    lastPushTimestamp = messageTimestamp;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        lastPushTimestamp = -1;
+    });
     
+    [voipAudioPlayer play];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 55 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        [voipAudioPlayer stop];
+    });
+    
+    if ([self getSuppressProcessing]) {
+        [voipAudioPlayer stop];
+        return;
+    };
+            
     NSString *messageTimestampStr;
     
     if (messageTimestamp != -1) {
