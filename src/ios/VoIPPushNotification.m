@@ -65,11 +65,11 @@ static NSString* MESSAGE_KEY = @"message";
     
 }
 
-- (void)debounce:(SEL)sel delay:(NSTimeInterval)delay
+- (void)debounce:(SEL)sel delay:(NSTimeInterval)delay withString(NSString)withString
 {
   NSLog(@"[LEON] debounce");
   [NSObject cancelPreviousPerformRequestsWithTarget:self selector:sel object:nil];
-  [self performSelector:sel withObject:nil afterDelay:delay];
+  [self performSelector:sel withObject:@"withString" afterDelay:delay];
 }
 
 - (void) didInitialiseApp: (CDVInvokedUrlCommand*)command
@@ -240,8 +240,7 @@ static NSString* MESSAGE_KEY = @"message";
 }
 
 
-- (void)showLocalNotificationAndBringToFront
-{
+- (void)showLocalNotificationAndBringToFront:(NSString *)messageTimestampStr{
     NSLog(@"[LEON] showLocalNotificationAndBringToFront");
     [self foregroundApp: ^(bool foregrounded) {
         if (!foregrounded)
@@ -343,7 +342,7 @@ static NSString* MESSAGE_KEY = @"message";
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
-                [self debounce:@selector(showLocalNotificationAndBringToFront) delay:5];
+                [self debounce:@selector(showLocalNotificationAndBringToFront:) delay:5 withString:messageTimestampStr];
             }
         }
         
