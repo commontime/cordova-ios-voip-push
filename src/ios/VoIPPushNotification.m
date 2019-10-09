@@ -363,7 +363,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    [self debounce:@selector(onVoipPush:) delay:5 withObject:payload];
+    [self debounce:@selector(onVoipPush:) delay:5 withPayload:payload];
 }
 
 - (BOOL) containsKey: (NSDictionary*) dict: (NSString*) key
