@@ -28,6 +28,10 @@ static NSString* MESSAGE_KEY = @"message";
 + (void)load
 {
     [self swizzleWKWebViewEngine];
+    AVAudioSession* session = [AVAudioSession sharedInstance];
+    [session setActive:NO error:NULL];
+    [session setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:NULL];
+    [session setActive:YES error:NULL];
 }
 
 #pragma mark JS Functions
@@ -478,18 +482,6 @@ static NSString* MESSAGE_KEY = @"message";
     NSURL* url = [NSURL fileURLWithPath:path];
     ignoreListAudioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:NULL];
     ignoreListAudioPlayer.volume = 1;
-};
-
-/**
- * Configure the audio session.
- */
-- (void) configureAudioSession
-{
-    if (session) return;
-    AVAudioSession* session = [AVAudioSession sharedInstance];
-    [session setActive:NO error:NULL];
-    [session setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:NULL];
-    [session setActive:YES error:NULL];
 };
 
 #pragma mark -
