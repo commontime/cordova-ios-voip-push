@@ -243,6 +243,29 @@ static NSString* MESSAGE_KEY = @"message";
     }
 }
 
+-(long)getPushTimestamp:(NSDictionary*)payloadDict{
+    long ts = -1;
+    
+    if ([self containsKey: payloadDict: TIMESTAMP_KEY])
+    {
+        ts = [[payloadDict objectForKey: TIMESTAMP_KEY] longLongValue];
+    }
+    
+    // If a timestamp can't be found at the aps level, look for it in the alert object.
+    if (ts == -1)
+    {
+        if ([self containsKey: payloadDict: ALERT_KEY])
+        {
+            NSDictionary* apsAlertObject = [payloadDict objectForKey: ALERT_KEY];
+            if ([self containsKey: apsAlertObject: TIMESTAMP_KEY])
+            {
+                ts = [[apsAlertObject objectForKey: TIMESTAMP_KEY] longLongValue];
+            }
+        }
+    }
+    return ts;
+}
+
 
 - (void)onVoipPush:(PKPushPayload *)payload{
     NSLog(@"[LEON] onVoipPush");
@@ -268,25 +291,7 @@ static NSString* MESSAGE_KEY = @"message";
     
     NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
     
-    long messageTimestamp = -1;
-    
-    if ([self containsKey: payloadDict: TIMESTAMP_KEY])
-    {
-        messageTimestamp = [[payloadDict objectForKey: TIMESTAMP_KEY] longLongValue];
-    }
-    
-    // If a timestamp can't be found at the aps level, look for it in the alert object.
-    if (messageTimestamp == -1)
-    {
-        if ([self containsKey: payloadDict: ALERT_KEY])
-        {
-            NSDictionary* apsAlertObject = [payloadDict objectForKey: ALERT_KEY];
-            if ([self containsKey: apsAlertObject: TIMESTAMP_KEY])
-            {
-                messageTimestamp = [[apsAlertObject objectForKey: TIMESTAMP_KEY] longLongValue];
-            }
-        }
-    }
+    long messageTimestamp = [self getPushTimestamp:payloadDict]];
     
     NSString *messageTimestampStr;
     
@@ -362,13 +367,26 @@ static NSString* MESSAGE_KEY = @"message";
     }
 }
 
+-(int)getRandomNumberBetween:(int)from and:(int)to {
+
+    return (int)from + arc4random() % (to-from+1);
+}
+
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
     NSLog(@"[LEON] Push received");
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-        NSLog(@"[LEON] delayed onVoipPush for 5 seconds");
-        [self onVoipPush:payload];
-    });
+
+    NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
+    long ts = [self getPushTimestamp:newPushData];
+    if (ts == lastPushTimestamp) return;
+    lastPushTimestamp = ts;
+    [self onVoipPush:payload];
+
+    // int randomNumber = [self getRandomNumberBetween:1 and:5];
+    // dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    //     NSLog(@"[LEON] delayed onVoipPush for 5 seconds");
+    //     [self onVoipPush:payload];
+    // });
     // [self debounce:@selector(onVoipPush:) delay:5 withPayload:payload];
 }
 

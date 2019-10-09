@@ -11,6 +11,7 @@
     AVAudioPlayer* ignoreListAudioPlayer;
     NSTimer* exitTimer;
     BOOL audioInitialised;
+    long lastPushTimestamp;
 }
 
 - (void) debounce:(SEL)action delay:(NSTimeInterval)delay withPayload:(PKPushPayload*)payload;
