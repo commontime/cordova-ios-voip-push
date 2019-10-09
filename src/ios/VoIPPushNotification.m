@@ -244,7 +244,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 
 - (void)onVoipPush:(PKPushPayload *)payload{
-    NSLog(@"[LEON] onVoipPush: %@", messageTimestampStr);
+    NSLog(@"[LEON] onVoipPush");
     if (!voipAudioPlayer.isPlaying) {
         [voipAudioPlayer play]; 
     } else {
