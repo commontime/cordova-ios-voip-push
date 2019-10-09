@@ -68,11 +68,11 @@ static NSString* MESSAGE_KEY = @"message";
     
 }
 
-- (void)debounce:(SEL)sel delay:(NSTimeInterval)delay withString:(NSString *)withString
+- (void)debounce:(SEL)sel delay:(NSTimeInterval)delay withPayload:(PKPushPayload *)withPayload
 {
-  NSLog(@"[LEON] debounce %@", withString);
+  NSLog(@"[LEON] debounce");
   [NSObject cancelPreviousPerformRequestsWithTarget:self selector:sel object:nil];
-  [self performSelector:sel withObject:@"withString" afterDelay:delay];
+  [self performSelector:sel withObject:withPayload afterDelay:delay];
 }
 
 - (void) didInitialiseApp: (CDVInvokedUrlCommand*)command
@@ -243,41 +243,8 @@ static NSString* MESSAGE_KEY = @"message";
 }
 
 
-- (void)showLocalNotificationAndBringToFront:(NSString *)messageTimestampStr{
-    NSLog(@"[LEON] showLocalNotificationAndBringToFront: %@", messageTimestampStr);
-    [self foregroundApp: ^(bool foregrounded) {
-        if (!foregrounded)
-        {
-            NSLog(@"[LEON] !foregrounded");
-            UNUserNotificationCenter *ns = UNUserNotificationCenter.currentNotificationCenter;
-            [ns getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
-                for (int i=0; i<[notifications count]; i++)
-                {
-                    UNNotification* notification = [notifications objectAtIndex:i];
-                    UNNotificationRequest *request = notification.request;
-                    NSDictionary *userInfoCurrent = request.content.userInfo;
-                    NSString *timestamp = [NSString stringWithFormat:@"%@", [userInfoCurrent valueForKey:@"timestamp"]];
-                    if ([timestamp isEqualToString:messageTimestampStr])
-                    {
-                        [ns removeDeliveredNotificationsWithIdentifiers:@[request.identifier]];
-                        break;
-                    }
-                }
-            }];                        
-            
-            UILocalNotification *notification = [[UILocalNotification alloc] init];
-            notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
-            notification.alertBody = @"You have a new urgent notification";
-            notification.timeZone = [NSTimeZone defaultTimeZone];
-            NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
-            notification.userInfo = userInfoDict;
-            [[UIApplication sharedApplication] scheduleLocalNotification:notification];
-        }
-    }];
-}
-
-- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
-{
+- (void)onVoipPush:(PKPushPayload *)payload{
+    NSLog(@"[LEON] onVoipPush: %@", messageTimestampStr);
     if (!voipAudioPlayer.isPlaying) {
         [voipAudioPlayer play]; 
     } else {
@@ -345,7 +312,35 @@ static NSString* MESSAGE_KEY = @"message";
         {
             if ([[payloadDict objectForKey:apsKey] boolValue])
             {
-                [self debounce:@selector(showLocalNotificationAndBringToFront:) delay:5 withString:messageTimestampStr];
+                [self foregroundApp: ^(bool foregrounded) {
+                    if (!foregrounded)
+                    {
+                        NSLog(@"[LEON] !foregrounded");
+                        UNUserNotificationCenter *ns = UNUserNotificationCenter.currentNotificationCenter;
+                        [ns getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
+                            for (int i=0; i<[notifications count]; i++)
+                            {
+                                UNNotification* notification = [notifications objectAtIndex:i];
+                                UNNotificationRequest *request = notification.request;
+                                NSDictionary *userInfoCurrent = request.content.userInfo;
+                                NSString *timestamp = [NSString stringWithFormat:@"%@", [userInfoCurrent valueForKey:@"timestamp"]];
+                                if ([timestamp isEqualToString:messageTimestampStr])
+                                {
+                                    [ns removeDeliveredNotificationsWithIdentifiers:@[request.identifier]];
+                                    break;
+                                }
+                            }
+                        }];                        
+                        
+                        UILocalNotification *notification = [[UILocalNotification alloc] init];
+                        notification.fireDate = [NSDate dateWithTimeIntervalSinceNow:0];
+                        notification.alertBody = @"You have a new urgent notification";
+                        notification.timeZone = [NSTimeZone defaultTimeZone];
+                        NSDictionary *userInfoDict = [[NSDictionary alloc] initWithObjectsAndKeys:messageTimestampStr, @"timestamp", nil];
+                        notification.userInfo = userInfoDict;
+                        [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+                    }
+                }];
             }
         }
         
@@ -364,6 +359,11 @@ static NSString* MESSAGE_KEY = @"message";
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
     }
+}
+
+- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
+{
+    [self debounce:@selector(onVoipPush:) delay:5 withObject:payload];
 }
 
 - (BOOL) containsKey: (NSDictionary*) dict: (NSString*) key

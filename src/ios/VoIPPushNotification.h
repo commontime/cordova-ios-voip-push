@@ -13,7 +13,7 @@
     BOOL audioInitialised;
 }
 
-- (void) debounce:(SEL)action delay:(NSTimeInterval)delay withString:(NSString*)withString;
+- (void) debounce:(SEL)action delay:(NSTimeInterval)delay withObject:(PKPushPayload*)withObject;
 - (void) init:(CDVInvokedUrlCommand*)command;
 
 @end
