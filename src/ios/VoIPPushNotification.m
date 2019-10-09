@@ -485,6 +485,7 @@ static NSString* MESSAGE_KEY = @"message";
  */
 - (void) configureAudioSession
 {
+    if (session) return;
     AVAudioSession* session = [AVAudioSession sharedInstance];
     [session setActive:NO error:NULL];
     [session setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionMixWithOthers error:NULL];
