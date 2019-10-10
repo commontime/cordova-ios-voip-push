@@ -221,10 +221,10 @@ static NSString* MESSAGE_KEY = @"message";
     }
 }
 
-- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
-{
+-(NSDictionary*)processPush:(PKPushPayload *)payload {
+
     NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
-    NSLog(@"[objC] didReceiveIncomingPushWithPayload: %@", payloadDict);
+    NSLog(@"[objC] processPush: %@", payloadDict);
     
     NSMutableDictionary *newPushData = [[NSMutableDictionary alloc] init];
     
@@ -248,7 +248,7 @@ static NSString* MESSAGE_KEY = @"message";
         }
     }
 
-    if (lastPushTimestamp == messageTimestamp) return;
+    if (lastPushTimestamp != messageTimestamp) return [[NSDictionary alloc] init];
     lastPushTimestamp = messageTimestamp;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         lastPushTimestamp = -1;
@@ -262,7 +262,7 @@ static NSString* MESSAGE_KEY = @"message";
     
     if ([self getSuppressProcessing]) {
         [voipAudioPlayer stop];
-        return;
+        return [[NSDictionary alloc] init];
     };
             
     NSString *messageTimestampStr;
@@ -274,7 +274,7 @@ static NSString* MESSAGE_KEY = @"message";
         {
             if (initTimestamp > messageTimestamp) {
                 [voipAudioPlayer stop];
-                return;
+                return [[NSDictionary alloc] init];
             }
         }
     }
@@ -331,7 +331,16 @@ static NSString* MESSAGE_KEY = @"message";
     }
     
     [newPushData setObject:@"APNS" forKey:@"service"];
+
+    return newPushData;
+
+}
+
+- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
+{
     
+    NSLog(@"[objC] didReceiveIncomingPushWithPayload!");
+    NSDictionary* newPushData = [self processPush:payload];
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:newPushData];
     [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
     for (id voipCallbackId in callbackIds) {
