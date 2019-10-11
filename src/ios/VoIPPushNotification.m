@@ -336,7 +336,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 }
 
-- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type withCompletionHandler:(void (^)(void))completion{
+- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushTypeVoIP)type withCompletionHandler:(void (^)(void))completion{
     
     NSLog(@"[objC] didReceiveIncomingPushWithPayload!");
     NSDictionary* newPushData = [self processPush:payload];
