@@ -336,7 +336,7 @@ static NSString* MESSAGE_KEY = @"message";
 
 }
 
-- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
+- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type withCompletionHandler:(void (^)(void))completion;
 {
     
     NSLog(@"[objC] didReceiveIncomingPushWithPayload!");
@@ -346,6 +346,7 @@ static NSString* MESSAGE_KEY = @"message";
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
     }
+    [completion];
 }
 
 - (BOOL) containsKey: (NSDictionary*) dict: (NSString*) key
