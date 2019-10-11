@@ -346,7 +346,7 @@ static NSString* MESSAGE_KEY = @"message";
     for (id voipCallbackId in callbackIds) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:voipCallbackId];
     }
-    [self completion];
+    completion();
 }
 
 - (BOOL) containsKey: (NSDictionary*) dict: (NSString*) key
