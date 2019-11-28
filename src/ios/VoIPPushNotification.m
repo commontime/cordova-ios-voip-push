@@ -363,7 +363,7 @@ static NSString* MESSAGE_KEY = @"message";
         } else {
             appBroughtToFront = YES;
         }
-        if (foregroundAppCompletionHandler != nil) {
+        if (_foregroundAppCompletionHandler != nil) {
             _foregroundAppCompletionHandler(isOpen);
             _foregroundAppCompletionHandler = nil;
         }
