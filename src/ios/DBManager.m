@@ -25,6 +25,10 @@ static NSString *DATE = @"date";
 
 - (BOOL) openDB
 {
+    NSURL *groupURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier: [NSString stringWithFormat:@"group.%@", [[NSBundle mainBundle] bundleIdentifier]]];
+    
+    databasePath = [[NSString alloc] initWithString: [[groupURL path] stringByAppendingPathComponent:DATABASE_NAME]];
+    
     NSString *docsDir;
     NSArray *dirPaths;
     
