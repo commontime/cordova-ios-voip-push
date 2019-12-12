@@ -184,14 +184,14 @@ static NSString* MESSAGE_KEY = @"message";
 
 - (void) setSuppressProcessing: (BOOL) supress
 {
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *preferences = [[NSUserDefaults alloc] initWithSuiteName:[NSString stringWithFormat:@"group.%@", [[NSBundle mainBundle] bundleIdentifier]]];
     [preferences setBool:supress forKey:SUPPRESS_PROCESSING_KEY];
     [preferences synchronize];
 }
 
 - (BOOL) getSuppressProcessing
 {
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *preferences = [[NSUserDefaults alloc] initWithSuiteName:[NSString stringWithFormat:@"group.%@", [[NSBundle mainBundle] bundleIdentifier]]];
     return [preferences boolForKey:SUPPRESS_PROCESSING_KEY];
 }
 
