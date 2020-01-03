@@ -248,6 +248,18 @@ static NSString* MESSAGE_KEY = @"message";
         }
     }
 
+    long expiryTTL = -1;
+    
+    if ([self containsKey: payload.dictionaryPayload: EXPIRY_TTL_KEY])
+    {
+        expiryTTL = [payload.dictionaryPayload[EXPIRY_TTL_KEY] longLongValue];
+    }
+    
+    if (expiryTTL > -1) {
+        long expiredTimestamp = messageTimestamp + (expiryTTL * 1000);
+        if (expiredTimestamp < [[NSDate date] timeIntervalSince1970] * 1000) return;
+    }
+
     if (lastPushTimestamp == messageTimestamp) return;
     lastPushTimestamp = messageTimestamp;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
