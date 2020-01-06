@@ -10,6 +10,7 @@
 static NSString* SUPPRESS_PROCESSING_KEY = @"suppressProcessing";
 static NSString* ALERT_KEY = @"alert";
 static NSString* TIMESTAMP_KEY = @"timestamp";
+static NSString* EXPIRY_TTL_KEY = @"expiryTTL";
 static NSString* BRING_TO_FRONT_KEY = @"bringToFront";
 static NSString* MESSAGE_KEY = @"message";
 
